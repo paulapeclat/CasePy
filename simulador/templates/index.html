@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Simulador de Inserção de Jogadores</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif; max-width: 960px; margin: 30px auto; padding: 20px; background: #f5f7fa; color: #222; }
+        h1 { color: #2d3748; margin-bottom: 4px; }
+        p.sub { color: #4a5568; margin-top: 0; }
+        table { width: 100%; border-collapse: collapse; background: white; margin: 20px 0; box-shadow: 0 1px 3px rgba(0,0,0,.08); border-radius: 6px; overflow: hidden; }
+        th, td { padding: 10px 12px; border-bottom: 1px solid #e2e8f0; text-align: left; }
+        th { background: #2d3748; color: white; font-weight: 600; font-size: 14px; }
+        input { width: 100%; padding: 8px; border: 1px solid #cbd5e0; border-radius: 4px; font-size: 14px; }
+        input:focus { outline: none; border-color: #3182ce; }
+        .actions { display: flex; gap: 10px; margin-top: 12px; }
+        button { padding: 10px 18px; border: none; cursor: pointer; border-radius: 4px; font-size: 14px; font-weight: 500; }
+        .btn-primary { background: #3182ce; color: white; }
+        .btn-primary:hover { background: #2c5282; }
+        .btn-secondary { background: #edf2f7; color: #2d3748; }
+        .btn-secondary:hover { background: #e2e8f0; }
+        .btn-remover { background: transparent; color: #e53e3e; font-size: 20px; padding: 4px 10px; }
+        #resultado { margin-top: 24px; padding: 16px; background: white; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+        #resultado h3 { margin-top: 0; color: #2d3748; }
+        pre { background: #1a202c; color: #e2e8f0; padding: 12px; border-radius: 4px; overflow: auto; font-size: 13px; max-height: 400px; }
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+        .badge-ok { background: #c6f6d5; color: #22543d; }
+        .badge-erro { background: #fed7d7; color: #742a2a; }
+    </style>
+</head>
+<body>
+    <h1>Simulador de Inserção de Jogadores</h1>
+    <p class="sub">Insira múltiplos jogadores. A cada envio, o pipeline de <code>completo.py</code> é executado e um novo arquivo JSON é gerado em <code>./dados/</code>.</p>
+
+    <form id="form-jogadores">
+        <table id="tabela-jogadores">
+            <thead>
+                <tr>
+                    <th style="width: 35%">Nickname</th>
+                    <th>Mortes</th>
+                    <th>Abates</th>
+                    <th>Assistências</th>
+                    <th style="width: 40px"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><input type="text" name="Nickname" required placeholder="ex: ShadowByte_99"></td>
+                    <td><input type="number" name="Mortes" value="0" required></td>
+                    <td><input type="number" name="Abates" value="0" required></td>
+                    <td><input type="number" name="Assistências" value="0" required></td>
+                    <td><button type="button" class="btn-remover" onclick="removerLinha(this)">×</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="actions">
+            <button type="button" class="btn-secondary" onclick="adicionarLinha()">+ Adicionar linha</button>
+            <button type="submit" class="btn-primary">Enviar inserção</button>
+        </div>
+    </form>
+
+    <div id="resultado" style="display: none;"></div>
+
+    <script>
+        function adicionarLinha() {
+            const tbody = document.querySelector("#tabela-jogadores tbody");
+            const linha = document.createElement("tr");
+            linha.innerHTML = `
+                <td><input type="text" name="Nickname" required placeholder="ex: ProSniper_X"></td>
+                <td><input type="number" name="Mortes" value="0" required></td>
+                <td><input type="number" name="Abates" value="0" required></td>
+                <td><input type="number" name="Assistências" value="0" required></td>
+                <td><button type="button" class="btn-remover" onclick="removerLinha(this)">×</button></td>
+            `;
+            tbody.appendChild(linha);
+        }
+
+        function removerLinha(botao) {
+            const linhas = document.querySelectorAll("#tabela-jogadores tbody tr");
+            if (linhas.length > 1) botao.closest("tr").remove();
+        }
+
+        document.getElementById("form-jogadores").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const linhas = document.querySelectorAll("#tabela-jogadores tbody tr");
+            const jogadores = [];
+            linhas.forEach(linha => {
+                const inputs = linha.querySelectorAll("input");
+                if (!inputs[0].value.trim()) return;
+                jogadores.push({
+                    Nickname: inputs[0].value.trim(),
+                    Mortes: parseInt(inputs[1].value) || 0,
+                    Abates: parseInt(inputs[2].value) || 0,
+                    "Assistências": parseInt(inputs[3].value) || 0,
+                });
+            });
+
+            if (jogadores.length === 0) {
+                alert("Preencha pelo menos um jogador.");
+                return;
+            }
+
+            try {
+                const res = await fetch("/inserir", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(jogadores),
+                });
+                const data = await res.json();
+                const div = document.getElementById("resultado");
+                div.style.display = "block";
+
+                if (!res.ok) {
+                    div.innerHTML = `<h3>Erro</h3><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                    return;
+                }
+
+                const linhasResumo = data.resultados.map(r => {
+                    const badge = r.Erro
+                        ? `<span class="badge badge-erro">erro</span>`
+                        : `<span class="badge badge-ok">OK</span>`;
+                    const idx = r.IndiceCombate !== undefined ? r.IndiceCombate.toFixed(2) : "—";
+                    return `<tr><td>${r.Nickname}</td><td>${idx}</td><td>${badge}</td></tr>`;
+                }).join("");
+
+                div.innerHTML = `
+                    <h3>Arquivo gerado: <code>${data.arquivo_gerado}</code></h3>
+                    <p>Total processado: <strong>${data.total}</strong></p>
+                    <table>
+                        <thead><tr><th>Nickname</th><th>Índice de Combate</th><th>Status</th></tr></thead>
+                        <tbody>${linhasResumo}</tbody>
+                    </table>
+                    <details>
+                        <summary style="cursor: pointer; margin-bottom: 8px;">Ver JSON completo</summary>
+                        <pre>${JSON.stringify(data.resultados, null, 2)}</pre>
+                    </details>
+                `;
+            } catch (err) {
+                alert("Falha na requisição: " + err.message);
+            }
+        });
+    </script>
+</body>
+</html>

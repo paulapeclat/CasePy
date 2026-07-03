@@ -1,0 +1,34 @@
+{
+  "gerado_em": "2026-07-03T10:59:50.142858",
+  "total": 2,
+  "resultados": [
+    {
+      "Nickname": "hjskdfds",
+      "Mortes": 1,
+      "Abates": 0,
+      "Assistências": 0,
+      "IndiceCombate": 0.0,
+      "Status": "ok",
+      "Entrada": {
+        "Nickname": "hjskdfds",
+        "Mortes": 1,
+        "Abates": 0,
+        "Assistências": 0
+      }
+    },
+    {
+      "Nickname": "dfsdsfzsd",
+      "Mortes": 68565,
+      "Abates": 4,
+      "Assistências": 4,
+      "IndiceCombate": 0.0,
+      "Status": "ok",
+      "Entrada": {
+        "Nickname": "dfsdsfzsd",
+        "Mortes": 68565,
+        "Abates": 4,
+        "Assistências": 4
+      }
+    }
+  ]
+}

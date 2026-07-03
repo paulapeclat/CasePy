@@ -1,0 +1,22 @@
+[
+  {
+    "Nickname": "ShadowByte_99",
+    "Mortes": 5,
+    "Abates": 20,
+    "Assistências": 8,
+    "IndiceCombate": 5.6
+  },
+  {
+    "Nickname": "GhostRunner_77",
+    "Mortes": 0,
+    "Abates": 10,
+    "Assistências": 4,
+    "IndiceCombate": 14.0
+  },
+  {
+    "Nickname": "IncompletoZ",
+    "Mortes": 2,
+    "Abates": 8,
+    "Erro": "1 validation error for Jogador\nAssistências\n  Field required [type=missing, input_value={'Nickname': 'IncompletoZ...Mortes': 2, 'Abates': 8}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing"
+  }
+]

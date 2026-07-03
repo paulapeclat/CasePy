@@ -4,6 +4,8 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 from pydantic import BaseModel, field_validator, ValidationError
 import json
+from datetime import datetime
+from pathlib import Path
 
 
 class Jogador(BaseModel):
@@ -44,10 +46,37 @@ def sanitizar_registro(registro: dict) -> dict:
     return registro
 
 
+def _processar(r: dict) -> dict:
+    r = sanitizar_registro(dict(r))
+    try:
+        j = Jogador(**r)
+        return {
+            "Nickname": j.Nickname,
+            "Mortes": j.Mortes,
+            "Abates": j.Abates,
+            "Assistências": j.Assistências,
+            "IndiceCombate": round(indice_combate(j.Mortes, j.Abates, j.Assistências), 2),
+        }
+    except (ValidationError, Exception) as e:
+        return {**r, "Erro": str(e)}
+
+
+def processar_registros(registros: list[dict]) -> list[dict]:
+    return [_processar(r) for r in registros]
+
+
+def salvar_novo_json(resultados: list[dict], pasta_destino: str = "dados") -> str:
+    pasta = Path(pasta_destino)
+    pasta.mkdir(parents=True, exist_ok=True)
+    caminho = pasta / f"insercao_{datetime.now():%Y%m%d_%H%M%S_%f}.json"
+    caminho.write_text(json.dumps(resultados, ensure_ascii=False, indent=2), encoding="utf-8")
+    return str(caminho)
+
+
 if __name__ == "__main__":
     import os
 
-    json_file = "ficha_geral_player.json"
+    json_file = str(Path(__file__).with_name("ficha_geral_player.json"))
 
     if os.path.exists(json_file):
         registros_jogadores = carregar_registros_jogadores(json_file)
