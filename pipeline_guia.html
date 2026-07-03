@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pipeline de Dados — Guia para Iniciantes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #080b12;
+  --bg2:      #0d1120;
+  --bg3:      #111827;
+  --border:   #1e2740;
+  --border2:  #2a3555;
+  --text:     #e2e8f0;
+  --muted:    #64748b;
+  --dim:      #334155;
+
+  --purple:   #818cf8;
+  --purple-d: #3730a3;
+  --purple-bg:#1a1040;
+
+  --teal:     #34d399;
+  --teal-d:   #065f46;
+  --teal-bg:  #021f15;
+
+  --coral:    #fb923c;
+  --coral-d:  #7c2d12;
+  --coral-bg: #1f0d05;
+
+  --amber:    #fbbf24;
+  --amber-d:  #78350f;
+  --amber-bg: #1a0e02;
+
+  --blue:     #60a5fa;
+  --blue-d:   #1e3a5f;
+  --blue-bg:  #03101e;
+
+  --pink:     #f472b6;
+  --pink-d:   #701a4f;
+  --pink-bg:  #1a0512;
+
+  --font-display: 'Syne', sans-serif;
+  --font-body:    'DM Sans', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.7;
+  min-height: 100vh;
+}
+
+/* ── SCROLLBAR ─────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ── LAYOUT ─────────────────────────────────────────── */
+.shell {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 100vh;
+}
+
+/* ── SIDEBAR ─────────────────────────────────────────── */
+.sidebar {
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  padding: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.brand {
+  padding: 28px 24px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.brand-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.brand-tag::before {
+  content: '';
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--teal);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .3; }
+}
+.brand h1 {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+}
+.brand p {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+.nav-section {
+  padding: 16px 16px 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 20px;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: all .15s;
+  text-decoration: none;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 400;
+}
+.nav-item:hover {
+  color: var(--text);
+  background: var(--bg3);
+}
+.nav-item.active {
+  color: var(--text);
+  border-left-color: currentColor;
+  background: var(--bg3);
+  font-weight: 500;
+}
+.nav-item.active.c-purple { border-left-color: var(--purple); color: var(--purple); }
+.nav-item.active.c-teal   { border-left-color: var(--teal);   color: var(--teal);   }
+.nav-item.active.c-coral  { border-left-color: var(--coral);  color: var(--coral);  }
+.nav-item.active.c-amber  { border-left-color: var(--amber);  color: var(--amber);  }
+.nav-item.active.c-blue   { border-left-color: var(--blue);   color: var(--blue);   }
+.nav-item.active.c-pink   { border-left-color: var(--pink);   color: var(--pink);   }
+
+.nav-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  opacity: .5;
+}
+.nav-item.active .nav-dot { opacity: 1; }
+.c-purple .nav-dot { background: var(--purple); }
+.c-teal   .nav-dot { background: var(--teal);   }
+.c-coral  .nav-dot { background: var(--coral);  }
+.c-amber  .nav-dot { background: var(--amber);  }
+.c-blue   .nav-dot { background: var(--blue);   }
+.c-pink   .nav-dot { background: var(--pink);   }
+
+.order-badge {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--dim);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 1px 6px;
+  border-radius: 10px;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--dim);
+  font-family: var(--font-mono);
+}
+
+/* ── MAIN ─────────────────────────────────────────────── */
+.main {
+  overflow-y: auto;
+}
+
+.section {
+  display: none;
+  padding: 48px 56px;
+  max-width: 860px;
+  animation: fadeIn .25s ease;
+}
+.section.active { display: block; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ── SECTION HERO ─────────────────────────────────────── */
+.sec-hero {
+  margin-bottom: 36px;
+}
+.sec-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.sec-eyebrow .num {
+  font-size: 10px;
+  opacity: .5;
+}
+.sec-hero h2 {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1.15;
+  margin-bottom: 8px;
+}
+.sec-hero p {
+  font-size: 15px;
+  color: var(--muted);
+  max-width: 560px;
+  line-height: 1.65;
+}
+
+/* ── ANALOGY ──────────────────────────────────────────── */
+.analogy {
+  border-radius: 10px;
+  padding: 18px 22px;
+  margin: 0 0 32px;
+  border: 1px solid;
+  position: relative;
+  overflow: hidden;
+}
+.analogy::before {
+  content: '💡 analogia';
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  opacity: .6;
+  display: block;
+  margin-bottom: 8px;
+}
+.analogy p {
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+/* ── STEPS ────────────────────────────────────────────── */
+.steps { display: flex; flex-direction: column; gap: 4px; }
+
+.step-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color .15s;
+}
+.step-card:hover { border-color: var(--border2); }
+
+.step-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  cursor: pointer;
+  background: var(--bg2);
+  user-select: none;
+}
+.step-num {
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.step-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  flex: 1;
+}
+.step-toggle {
+  font-size: 16px;
+  color: var(--muted);
+  transition: transform .2s;
+  line-height: 1;
+}
+.step-card.open .step-toggle { transform: rotate(180deg); }
+
+.step-body {
+  display: none;
+  padding: 0 20px 20px;
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+}
+.step-card.open .step-body { display: block; }
+
+.step-desc {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 14px 0 10px;
+  line-height: 1.65;
+}
+
+/* ── CODE BLOCK ───────────────────────────────────────── */
+.code-wrap {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 12px 0;
+}
+.code-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--bg3);
+  border-bottom: 1px solid var(--border);
+}
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+.dot.r { background: #ff5f57; }
+.dot.y { background: #febc2e; }
+.dot.g { background: #28c840; }
+.code-filename {
+  margin-left: 4px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--dim);
+}
+pre {
+  padding: 16px 18px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.75;
+  overflow-x: auto;
+  white-space: pre;
+}
+.cm { color: #4a5568; }       /* comment */
+.kw { color: #93c5fd; }       /* keyword */
+.fn { color: #86efac; }       /* function/class */
+.st { color: #fca5a5; }       /* string */
+.nm { color: #fdba74; }       /* number */
+.dc { color: #c4b5fd; }       /* decorator */
+.tp { color: #67e8f9; }       /* type */
+
+/* ── TIP / WARN ────────────────────────────────────────── */
+.tip, .warn {
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 12px 0;
+  font-size: 13px;
+  line-height: 1.65;
+  border: 1px solid;
+}
+.tip  { background: rgba(52,211,153,.07); border-color: rgba(52,211,153,.2); color: #86efac; }
+.warn { background: rgba(248,113,113,.07); border-color: rgba(248,113,113,.2); color: #fca5a5; }
+.tip::before  { content: '✓  '; font-weight: 600; }
+.warn::before { content: '⚠  '; font-weight: 600; }
+
+/* ── COMPARE GRID ─────────────────────────────────────── */
+.compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 12px 0;
+}
+.compare-card {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.compare-label {
+  padding: 7px 12px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+}
+.compare-card .code-wrap { border: none; border-radius: 0; margin: 0; }
+.compare-card .code-bar  { display: none; }
+.compare-card pre { font-size: 11.5px; padding: 12px 14px; }
+.bad  .compare-label { background: rgba(248,113,113,.08); color: #f87171; }
+.good .compare-label { background: rgba(52,211,153,.08);  color: #34d399; }
+
+/* ── FORMULA ROW ──────────────────────────────────────── */
+.formula-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 12px 0;
+}
+.formula-card {
+  border-radius: 10px;
+  padding: 16px;
+  border: 1px solid;
+  text-align: center;
+}
+.formula-name { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 6px; opacity: .7; }
+.formula-eq   { font-family: var(--font-mono); font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+.formula-desc { font-size: 11px; line-height: 1.55; opacity: .75; }
+
+/* ── FLOW ─────────────────────────────────────────────── */
+.flow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 16px 0;
+  padding: 16px 18px;
+  background: var(--bg3);
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+.flow-step {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.flow-arrow { color: var(--dim); font-size: 14px; padding: 0 2px; }
+
+/* ── INLINE CODE ──────────────────────────────────────── */
+ic {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  padding: 1px 6px;
+  border-radius: 4px;
+  color: var(--text);
+}
+
+/* ── COLORS PER SECTION ───────────────────────────────── */
+.c-purple .sec-eyebrow,
+.c-purple .sec-hero h2 { color: var(--purple); }
+.c-teal   .sec-eyebrow,
+.c-teal   .sec-hero h2 { color: var(--teal);   }
+.c-coral  .sec-eyebrow,
+.c-coral  .sec-hero h2 { color: var(--coral);  }
+.c-amber  .sec-eyebrow,
+.c-amber  .sec-hero h2 { color: var(--amber);  }
+.c-blue   .sec-eyebrow,
+.c-blue   .sec-hero h2 { color: var(--blue);   }
+.c-pink   .sec-eyebrow,
+.c-pink   .sec-hero h2 { color: var(--pink);   }
+
+.c-purple .step-num { background: var(--purple-bg); color: var(--purple); }
+.c-teal   .step-num { background: var(--teal-bg);   color: var(--teal);   }
+.c-coral  .step-num { background: var(--coral-bg);  color: var(--coral);  }
+.c-amber  .step-num { background: var(--amber-bg);  color: var(--amber);  }
+.c-blue   .step-num { background: var(--blue-bg);   color: var(--blue);   }
+.c-pink   .step-num { background: var(--pink-bg);   color: var(--pink);   }
+
+.c-purple .analogy { background: var(--purple-bg); border-color: rgba(129,140,248,.2); color: #c4b5fd; }
+.c-teal   .analogy { background: var(--teal-bg);   border-color: rgba(52,211,153,.2);  color: #6ee7b7; }
+.c-coral  .analogy { background: var(--coral-bg);  border-color: rgba(251,146,60,.2);  color: #fdba74; }
+.c-amber  .analogy { background: var(--amber-bg);  border-color: rgba(251,191,36,.2);  color: #fcd34d; }
+.c-blue   .analogy { background: var(--blue-bg);   border-color: rgba(96,165,250,.2);  color: #93c5fd; }
+.c-pink   .analogy { background: var(--pink-bg);   border-color: rgba(244,114,182,.2); color: #f9a8d4; }
+
+/* ── HOME ─────────────────────────────────────────────── */
+#home {
+  display: block;
+  padding: 48px 56px;
+  max-width: 860px;
+}
+.home-tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--teal);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.home-tag span {
+  display: inline-block;
+  width: 24px;
+  height: 1px;
+  background: var(--teal);
+}
+.home h1 {
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+.home h1 em {
+  font-style: normal;
+  color: var(--purple);
+}
+.home-sub {
+  font-size: 16px;
+  color: var(--muted);
+  max-width: 520px;
+  line-height: 1.7;
+  margin-bottom: 36px;
+}
+
+.order-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 36px;
+}
+.order-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 18px;
+  cursor: pointer;
+  transition: border-color .15s, transform .15s;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+.order-card:hover { border-color: var(--border2); transform: translateY(-1px); }
+.order-n {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--dim);
+  padding-top: 3px;
+  min-width: 16px;
+}
+.order-card-title {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 3px;
+}
+.order-card-desc {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.pipeline-flow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 18px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  flex-wrap: wrap;
+  font-size: 12px;
+}
+.pf-item {
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.pf-arrow { color: var(--dim); }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+<!-- ── SIDEBAR ── -->
+<nav class="sidebar">
+  <div class="brand">
+    <div class="brand-tag">pipeline · ao vivo</div>
+    <h1>Game Data Pipeline</h1>
+    <p>Guia para iniciantes</p>
+  </div>
+
+  <div class="nav-section">índice</div>
+
+  <a class="nav-item active c-purple" onclick="go('dc')">
+    <span class="nav-dot"></span>
+    @dataclass
+    <span class="order-badge">01</span>
+  </a>
+  <a class="nav-item c-teal" onclick="go('enum')">
+    <span class="nav-dot"></span>
+    Enum
+    <span class="order-badge">02</span>
+  </a>
+  <a class="nav-item c-coral" onclick="go('prop')">
+    <span class="nav-dot"></span>
+    @property
+    <span class="order-badge">03</span>
+  </a>
+  <a class="nav-item c-amber" onclick="go('cache')">
+    <span class="nav-dot"></span>
+    Cache
+    <span class="order-badge">04</span>
+  </a>
+  <a class="nav-item c-blue" onclick="go('deco')">
+    <span class="nav-dot"></span>
+    Decoradores
+    <span class="order-badge">05</span>
+  </a>
+  <a class="nav-item c-pink" onclick="go('numpy')">
+    <span class="nav-dot"></span>
+    NumPy stats
+    <span class="order-badge">06</span>
+  </a>
+
+  <div class="nav-section" style="margin-top:16px">camadas do pipeline</div>
+  <div style="padding:8px 20px 16px;font-size:12px;color:var(--dim);line-height:1.9">
+    Servidor de jogo<br>
+    → Validação de eventos<br>
+    → Cálculo de métricas<br>
+    → Cache de resultados<br>
+    → Auditoria & log<br>
+    → Análise estatística
+  </div>
+
+  <div class="sidebar-footer">
+    python 3.11+ · numpy · functools
+  </div>
+</nav>
+
+<!-- ── MAIN ── -->
+<main class="main">
+
+<!-- @dataclass -->
+<div id="s-dc" class="section c-purple active">
+  <div class="sec-hero">
+    <div class="sec-eyebrow">
+      <span class="num">01 /</span> estrutura de dados
+    </div>
+    <h2>@dataclass</h2>
+    <p>Uma forma elegante de criar classes que só guardam dados, sem escrever código repetitivo.</p>
+  </div>
+
+  <div class="analogy">
+    <p>Imagine uma ficha de cadastro de jogador numa LAN house. Ela tem campos fixos: nome, CPF, telefone. Você não precisa inventar os campos toda vez — a ficha já define o que deve ser preenchido. <ic>@dataclass</ic> faz exatamente isso: define a estrutura dos seus dados em Python.</p>
+  </div>
+
+  <div class="steps">
+
+    <div class="step-card open">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">01</div>
+        <div class="step-title">O problema sem @dataclass</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="step-desc">Para representar um evento de kill, você precisaria escrever tudo na mão — muito código para guardar 4 campos:</div>
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">sem_dataclass.py</span></div>
+          <pre><span class="kw">class</span> <span class="fn">KillEvent</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, player_id, kills, damage, timestamp):
+        self.player_id = player_id
+        self.kills     = kills
+        self.damage    = damage
+        self.timestamp = timestamp
+
+    <span class="kw">def</span> <span class="fn">__repr__</span>(self):  <span class="cm"># pra aparecer legível no print</span>
+        <span class="kw">return</span> <span class="st">f"KillEvent({self.player_id}, kills={self.kills})"</span>
+
+<span class="cm"># 9 linhas para guardar 4 campos — todo esse trabalho manual</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-card open">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">02</div>
+        <div class="step-title">A solução com @dataclass</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="step-desc">Python gera o <ic>__init__</ic>, o <ic>__repr__</ic> e a comparação automaticamente:</div>
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">com_dataclass.py</span></div>
+          <pre><span class="kw">from</span> dataclasses <span class="kw">import</span> dataclass
+
+<span class="dc">@dataclass</span>
+<span class="kw">class</span> <span class="fn">KillEvent</span>:
+    player_id: <span class="tp">str</span>
+    kills:     <span class="tp">int</span>
+    damage:    <span class="tp">int</span>
+    timestamp: <span class="tp">float</span>
+
+<span class="cm"># Usando:</span>
+ev = <span class="fn">KillEvent</span>(player_id=<span class="st">"PLR-001"</span>, kills=<span class="nm">3</span>, damage=<span class="nm">1800</span>, timestamp=<span class="nm">1700000000.0</span>)
+<span class="fn">print</span>(ev)
+<span class="cm"># KillEvent(player_id='PLR-001', kills=3, damage=1800, timestamp=1700000000.0)</span></pre>
+        </div>
+        <div class="tip">O <ic>: str</ic>, <ic>: int</ic> depois do nome do campo é a <strong>type hint</strong>. Documenta o tipo esperado. Python não bloqueia em runtime, mas o VS Code avisa se você passar o tipo errado.</div>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">03</div>
+        <div class="step-title">Valor padrão nos campos</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="step-desc">Campos opcionais recebem valor padrão com <ic>=</ic>:</div>
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">valor_padrao.py</span></div>
+          <pre><span class="dc">@dataclass</span>
+<span class="kw">class</span> <span class="fn">KillEvent</span>:
+    player_id: <span class="tp">str</span>
+    kills:     <span class="tp">int</span>
+    damage:    <span class="tp">int</span>
+    timestamp: <span class="tp">float</span>
+    validated: <span class="tp">bool</span> = <span class="kw">False</span>  <span class="cm"># opcional, padrão False</span>
+
+ev = <span class="fn">KillEvent</span>(<span class="st">"PLR-001"</span>, <span class="nm">3</span>, <span class="nm">1800</span>, <span class="nm">1700000000.0</span>)
+<span class="fn">print</span>(ev.validated)  <span class="cm"># False</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">04</div>
+        <div class="step-title">frozen=True — imutável como um recibo</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="step-desc">Eventos já registrados não deveriam ser alterados. <ic>frozen=True</ic> proíbe qualquer modificação:</div>
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">frozen.py</span></div>
+          <pre><span class="dc">@dataclass</span>(frozen=<span class="kw">True</span>)
+<span class="kw">class</span> <span class="fn">KillEvent</span>:
+    player_id: <span class="tp">str</span>
+    kills:     <span class="tp">int</span>
+
+ev = <span class="fn">KillEvent</span>(<span class="st">"PLR-001"</span>, <span class="nm">3</span>)
+ev.kills = <span class="nm">99</span>  <span class="cm"># FrozenInstanceError — não pode mudar!</span></pre>
+        </div>
+        <div class="tip">Use <ic>frozen=True</ic> para eventos do passado (auditoria). Use sem <ic>frozen</ic> para objetos que ainda estão sendo construídos durante a partida.</div>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">05</div>
+        <div class="step-title">__post_init__ — validar na criação</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="step-desc">Método especial que roda automaticamente depois do <ic>__init__</ic>. Ideal para validar os campos:</div>
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">post_init.py</span></div>
+          <pre><span class="dc">@dataclass</span>
+<span class="kw">class</span> <span class="fn">KillEvent</span>:
+    player_id: <span class="tp">str</span>
+    kills:     <span class="tp">int</span>
+    damage:    <span class="tp">int</span>
+
+    <span class="kw">def</span> <span class="fn">__post_init__</span>(self):
+        <span class="kw">if not</span> self.player_id:
+            <span class="kw">raise</span> <span class="fn">ValueError</span>(<span class="st">"player_id não pode ser vazio"</span>)
+        <span class="kw">if</span> self.damage < <span class="nm">0</span>:
+            <span class="kw">raise</span> <span class="fn">ValueError</span>(<span class="st">f"damage inválido: {self.damage}"</span>)
+        <span class="kw">if</span> self.kills < <span class="nm">0</span>:
+            <span class="kw">raise</span> <span class="fn">ValueError</span>(<span class="st">f"kills não pode ser negativo: {self.kills}"</span>)
+
+<span class="cm"># Evento inválido é rejeitado na criação:</span>
+ev = <span class="fn">KillEvent</span>(<span class="st">"PLR-001"</span>, kills=<span class="nm">-1</span>, damage=<span class="nm">500</span>)
+<span class="cm"># ValueError: kills não pode ser negativo: -1</span></pre>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Enum -->
+<div id="s-enum" class="section c-teal">
+  <div class="sec-hero">
+    <div class="sec-eyebrow"><span class="num">02 /</span> valores fixos</div>
+    <h2>Enum</h2>
+    <p>Evita erros de digitação em strings e deixa o código mais legível e seguro.</p>
+  </div>
+
+  <div class="analogy">
+    <p>Imagine um formulário com a pergunta "Resultado: ( ) Positivo  ( ) Negativo". Você só pode marcar uma das duas — não existe "Positivo" escrito diferente. <ic>Enum</ic> define o conjunto fixo de valores possíveis para um campo.</p>
+  </div>
+
+  <div class="steps">
+
+    <div class="step-card open">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">01</div>
+        <div class="step-title">O problema sem Enum</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="step-desc">Tipos de evento como strings soltas causam bugs silenciosos:</div>
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">sem_enum.py</span></div>
+          <pre>ev1 = {<span class="st">"type"</span>: <span class="st">"kill"</span>}   <span class="cm"># funciona</span>
+ev2 = {<span class="st">"type"</span>: <span class="st">"klil"</span>}   <span class="cm"># typo — ninguém avisa</span>
+ev3 = {<span class="st">"type"</span>: <span class="st">"Kill"</span>}   <span class="cm"># maiúscula — falha silenciosa no if</span>
+ev4 = {<span class="st">"type"</span>: <span class="st">"KILL"</span>}   <span class="cm"># qual é o certo afinal?</span></pre>
+        </div>
+        <div class="warn">Erros de string só aparecem em runtime — muitas vezes horas depois, num log difícil de rastrear.</div>
+      </div>
+    </div>
+
+    <div class="step-card open">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">02</div>
+        <div class="step-title">A solução com Enum</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">event_type.py</span></div>
+          <pre><span class="kw">from</span> enum <span class="kw">import</span> Enum
+
+<span class="kw">class</span> <span class="fn">EventType</span>(Enum):
+    KILL        = <span class="st">"kill"</span>
+    DAMAGE      = <span class="st">"damage"</span>
+    SESSION_END = <span class="st">"session_end"</span>
+    ASSIST      = <span class="st">"assist"</span>
+
+<span class="cm"># Usando — sem aspas, sem typo:</span>
+ev_type = EventType.KILL
+<span class="fn">print</span>(ev_type)           <span class="cm"># EventType.KILL</span>
+<span class="fn">print</span>(ev_type.value)     <span class="cm"># "kill"</span>
+<span class="fn">print</span>(ev_type == EventType.KILL)  <span class="cm"># True</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">03</div>
+        <div class="step-title">Usando Enum com @dataclass e match/case</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">game_event.py</span></div>
+          <pre><span class="dc">@dataclass</span>
+<span class="kw">class</span> <span class="fn">GameEvent</span>:
+    player_id:  <span class="tp">str</span>
+    event_type: <span class="tp">EventType</span>  <span class="cm"># só aceita valores do Enum</span>
+    value:      <span class="tp">int</span>
+
+<span class="cm"># Criando eventos com segurança:</span>
+ev = <span class="fn">GameEvent</span>(<span class="st">"PLR-001"</span>, EventType.KILL, <span class="nm">3</span>)
+
+<span class="cm"># Despachando por tipo (Python 3.10+):</span>
+<span class="kw">match</span> ev.event_type:
+    <span class="kw">case</span> EventType.KILL:
+        <span class="fn">processar_kill</span>(ev)
+    <span class="kw">case</span> EventType.DAMAGE:
+        <span class="fn">processar_dano</span>(ev)
+    <span class="kw">case</span> EventType.SESSION_END:
+        <span class="fn">fechar_sessao</span>(ev)</pre>
+        </div>
+        <div class="tip"><ic>match/case</ic> com Enum é o padrão moderno. Se chegar um tipo novo que não existe, o código levanta erro imediatamente — melhor que falhar silenciosamente.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- @property -->
+<div id="s-prop" class="section c-coral">
+  <div class="sec-hero">
+    <div class="sec-eyebrow"><span class="num">03 /</span> cálculo lazy</div>
+    <h2>@property</h2>
+    <p>Transforma um método em algo que parece um atributo simples. Recalcula sempre que você acessa.</p>
+  </div>
+
+  <div class="analogy">
+    <p>Seu celular mostra "bateria restante em horas". Isso não é um campo fixo — é calculado na hora a partir da bateria atual dividida pelo consumo médio. Mas pra você aparece como se fosse um número simples. <ic>@property</ic> faz o mesmo: parece atributo, executa cálculo por baixo.</p>
+  </div>
+
+  <div class="steps">
+
+    <div class="step-card open">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">01</div>
+        <div class="step-title">O problema: campo salvo vs calculado</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="step-desc">Se você salvar o KDA como campo, ele fica desatualizado quando kills mudam:</div>
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">problema.py</span></div>
+          <pre><span class="kw">class</span> <span class="fn">Player</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, kills, deaths, assists):
+        self.kills   = kills
+        self.deaths  = deaths
+        self.assists = assists
+        self.kda     = (kills + assists) / <span class="fn">max</span>(deaths, <span class="nm">1</span>)
+        <span class="cm"># Problema: player.kills += 1 não atualiza self.kda!</span>
+
+p = <span class="fn">Player</span>(<span class="nm">5</span>, <span class="nm">2</span>, <span class="nm">1</span>)
+p.kills += <span class="nm">3</span>
+<span class="fn">print</span>(p.kda)  <span class="cm"># ainda mostra o valor antigo: 3.0 :(</span></pre>
+        </div>
+        <div class="warn">O KDA calculado uma vez no <ic>__init__</ic> nunca se atualiza automaticamente. Fica "stale" (obsoleto).</div>
+      </div>
+    </div>
+
+    <div class="step-card open">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">02</div>
+        <div class="step-title">A solução com @property</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">player_stats.py</span></div>
+          <pre><span class="dc">@dataclass</span>
+<span class="kw">class</span> <span class="fn">Player</span>:
+    kills:   <span class="tp">int</span>
+    deaths:  <span class="tp">int</span>
+    assists: <span class="tp">int</span>
+    wins:    <span class="tp">int</span>
+    games:   <span class="tp">int</span>
+
+    <span class="dc">@property</span>
+    <span class="kw">def</span> <span class="fn">kda</span>(self) -> <span class="tp">float</span>:
+        <span class="kw">return</span> (self.kills + self.assists) / <span class="fn">max</span>(self.deaths, <span class="nm">1</span>)
+
+    <span class="dc">@property</span>
+    <span class="kw">def</span> <span class="fn">win_rate</span>(self) -> <span class="tp">float</span>:
+        <span class="kw">return</span> self.wins / <span class="fn">max</span>(self.games, <span class="nm">1</span>)
+
+<span class="cm"># Usando — parece campo, é cálculo:</span>
+p = <span class="fn">Player</span>(kills=<span class="nm">8</span>, deaths=<span class="nm">2</span>, assists=<span class="nm">3</span>, wins=<span class="nm">6</span>, games=<span class="nm">10</span>)
+<span class="fn">print</span>(p.kda)       <span class="cm"># 5.5  — sem parênteses!</span>
+<span class="fn">print</span>(p.win_rate)  <span class="cm"># 0.6</span>
+p.kills += <span class="nm">2</span>
+<span class="fn">print</span>(p.kda)       <span class="cm"># 6.5  — atualizado automaticamente!</span></pre>
+        </div>
+        <div class="tip">Note que você chama <ic>p.kda</ic> sem parênteses, como se fosse um atributo. O <ic>@property</ic> intercepta a leitura e executa o método por baixo.</div>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">03</div>
+        <div class="step-title">As três fórmulas do pipeline</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="formula-row">
+          <div class="formula-card" style="background:var(--coral-bg);border-color:rgba(251,146,60,.2)">
+            <div class="formula-name" style="color:var(--coral)">KDA</div>
+            <div class="formula-eq" style="color:var(--coral)">(K + A) / max(D,1)</div>
+            <div class="formula-desc" style="color:#fdba74">Kills + Assists / Deaths. max(D,1) evita divisão por zero.</div>
+          </div>
+          <div class="formula-card" style="background:var(--coral-bg);border-color:rgba(251,146,60,.2)">
+            <div class="formula-name" style="color:var(--coral)">Win rate</div>
+            <div class="formula-eq" style="color:var(--coral)">wins / total_games</div>
+            <div class="formula-desc" style="color:#fdba74">Proporção de vitórias. ×100 para percentual.</div>
+          </div>
+          <div class="formula-card" style="background:var(--coral-bg);border-color:rgba(251,146,60,.2)">
+            <div class="formula-name" style="color:var(--coral)">Dano médio</div>
+            <div class="formula-eq" style="color:var(--coral)">sum(dmg) / games</div>
+            <div class="formula-desc" style="color:#fdba74">Total de dano por partidas jogadas. Indica agressividade.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Cache -->
+<div id="s-cache" class="section c-amber">
+  <div class="sec-hero">
+    <div class="sec-eyebrow"><span class="num">04 /</span> memoização</div>
+    <h2>Cache</h2>
+    <p>Como evitar sobrecarregar o banco de dados repetindo os mesmos cálculos caros.</p>
+  </div>
+
+  <div class="analogy">
+    <p>Imagine que você pergunta pro Google "capital do Brasil" e ele vai no banco de dados toda vez. Absurdo — a resposta nunca muda. O Google <em>memoriza</em> respostas frequentes. Cache é isso: guardar o resultado de algo caro para não refazer quando a pergunta é a mesma.</p>
+  </div>
+
+  <div class="flow">
+    <div class="flow-step">requisição de métrica</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step" style="border-color:var(--amber);color:var(--amber)">cache hit?</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step" style="border-color:var(--teal);color:var(--teal)">sim → retorna direto</div>
+    <div class="flow-arrow" style="opacity:.3">|</div>
+    <div class="flow-step" style="opacity:.6">não → calcula no banco</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">salva no cache</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">retorna resultado</div>
+  </div>
+
+  <div class="steps">
+
+    <div class="step-card open">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">01</div>
+        <div class="step-title">@lru_cache — o mais simples</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="step-desc">Para funções puras (mesmo input = mesmo output), use <ic>@lru_cache</ic>:</div>
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">lru_cache.py</span></div>
+          <pre><span class="kw">from</span> functools <span class="kw">import</span> lru_cache
+
+<span class="dc">@lru_cache</span>(maxsize=<span class="nm">256</span>)
+<span class="kw">def</span> <span class="fn">calcular_rank_historico</span>(player_id: <span class="tp">str</span>) -> <span class="tp">str</span>:
+    <span class="cm"># Simula consulta pesada ao banco</span>
+    historico = <span class="fn">buscar_banco</span>(player_id)  <span class="cm"># caro!</span>
+    <span class="kw">return</span> <span class="fn">processar_rank</span>(historico)
+
+<span class="cm"># 1ª chamada: vai ao banco (lento)</span>
+rank = <span class="fn">calcular_rank_historico</span>(<span class="st">"PLR-001"</span>)
+
+<span class="cm"># 2ª chamada com mesmo id: retorna do cache (instantâneo!)</span>
+rank = <span class="fn">calcular_rank_historico</span>(<span class="st">"PLR-001"</span>)
+
+<span class="fn">print</span>(<span class="fn">calcular_rank_historico</span>.cache_info())
+<span class="cm"># CacheInfo(hits=1, misses=1, maxsize=256, currsize=1)</span></pre>
+        </div>
+        <div class="tip"><ic>maxsize=256</ic> = guarda no máximo 256 resultados. Quando enche, descarta o <strong>menos recentemente usado</strong> (LRU). Passe <ic>maxsize=None</ic> para guardar tudo — use com cautela.</div>
+      </div>
+    </div>
+
+    <div class="step-card open">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">02</div>
+        <div class="step-title">Cache com TTL — para dados que mudam</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="step-desc">KDA muda a cada partida. Precisamos de cache que expira após um tempo:</div>
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">ttl_cache.py</span></div>
+          <pre><span class="kw">import</span> time
+
+_cache: <span class="tp">dict</span> = {}
+TTL = <span class="nm">300</span>  <span class="cm"># 5 minutos em segundos</span>
+
+<span class="kw">def</span> <span class="fn">get_kda</span>(player_id: <span class="tp">str</span>) -> <span class="tp">float</span>:
+    agora = <span class="fn">time.time</span>()
+
+    <span class="cm"># Está no cache e ainda não expirou?</span>
+    <span class="kw">if</span> player_id <span class="kw">in</span> _cache:
+        valor, salvo_em = _cache[player_id]
+        <span class="kw">if</span> agora - salvo_em < TTL:
+            <span class="fn">print</span>(<span class="st">"cache hit!"</span>)
+            <span class="kw">return</span> valor  <span class="cm"># retorna sem ir ao banco</span>
+
+    <span class="cm"># Cache vazio ou expirado: recalcula</span>
+    kda = <span class="fn">calcular_kda_no_banco</span>(player_id)
+    _cache[player_id] = (kda, agora)  <span class="cm"># guarda com timestamp</span>
+    <span class="kw">return</span> kda</pre>
+        </div>
+        <div class="tip">A lógica é sempre: 1) existe no cache? 2) ainda é válido? Se sim, retorna. Se não, calcula, salva e retorna.</div>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">03</div>
+        <div class="step-title">Quando invalidar o cache</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">invalidar.py</span></div>
+          <pre><span class="kw">def</span> <span class="fn">registrar_kill</span>(player_id: <span class="tp">str</span>, kills: <span class="tp">int</span>):
+    <span class="fn">salvar_no_banco</span>(player_id, kills)
+
+    <span class="cm"># KDA mudou — cache está desatualizado, remove</span>
+    <span class="kw">if</span> player_id <span class="kw">in</span> _cache:
+        <span class="kw">del</span> _cache[player_id]
+
+<span class="cm"># Para @lru_cache, use .cache_clear():</span>
+<span class="fn">calcular_rank_historico</span>.cache_clear()  <span class="cm"># limpa tudo</span></pre>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Decoradores -->
+<div id="s-deco" class="section c-blue">
+  <div class="sec-hero">
+    <div class="sec-eyebrow"><span class="num">05 /</span> cross-cutting concerns</div>
+    <h2>Decoradores</h2>
+    <p>Adicionar comportamento (log, timing, retry) sem modificar a função original.</p>
+  </div>
+
+  <div class="analogy">
+    <p>Todo caixa de banco precisa verificar identidade antes e registrar a transação depois. Você não modifica cada caixa individualmente — cria um <em>procedimento padrão</em> que envolve qualquer caixa automaticamente. Decorador é esse procedimento padrão aplicado a funções.</p>
+  </div>
+
+  <div class="steps">
+
+    <div class="step-card open">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">01</div>
+        <div class="step-title">Como um decorador funciona por dentro</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="step-desc"><ic>@decorator</ic> é açúcar sintático. Por baixo, é só uma função recebendo outra:</div>
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">como_funciona.py</span></div>
+          <pre><span class="cm"># Escrever isso:</span>
+<span class="dc">@audit_log</span>
+<span class="kw">def</span> <span class="fn">processar_kill</span>(event):
+    ...
+
+<span class="cm"># É exatamente igual a:</span>
+<span class="kw">def</span> <span class="fn">processar_kill</span>(event):
+    ...
+processar_kill = <span class="fn">audit_log</span>(processar_kill)
+<span class="cm"># audit_log recebe a função e retorna uma versão "embalada"</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-card open">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">02</div>
+        <div class="step-title">Construindo o @audit_log do zero</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">audit_log.py</span></div>
+          <pre><span class="kw">import</span> time
+<span class="kw">from</span> functools <span class="kw">import</span> wraps
+
+<span class="kw">def</span> <span class="fn">audit_log</span>(func):            <span class="cm"># 1) recebe a função</span>
+    <span class="dc">@wraps</span>(func)                <span class="cm"># 2) preserva nome e docstring</span>
+    <span class="kw">def</span> <span class="fn">wrapper</span>(*args, **kwargs):  <span class="cm"># 3) aceita qualquer assinatura</span>
+        t0 = <span class="fn">time.perf_counter</span>()
+        <span class="fn">print</span>(<span class="st">f"[AUDIT] Iniciando {func.__name__}"</span>)
+        <span class="kw">try</span>:
+            resultado = <span class="fn">func</span>(*args, **kwargs)  <span class="cm"># chama a original</span>
+            elapsed = <span class="fn">time.perf_counter</span>() - t0
+            <span class="fn">print</span>(<span class="st">f"[AUDIT] OK em {elapsed:.3f}s"</span>)
+            <span class="kw">return</span> resultado
+        <span class="kw">except</span> <span class="fn">Exception</span> <span class="kw">as</span> e:
+            <span class="fn">print</span>(<span class="st">f"[AUDIT] ERRO: {e}"</span>)
+            <span class="kw">raise</span>             <span class="cm"># propaga o erro</span>
+        <span class="kw">finally</span>:
+            <span class="fn">print</span>(<span class="st">f"[AUDIT] Fim de {func.__name__}"</span>)
+    <span class="kw">return</span> wrapper              <span class="cm"># 4) retorna a versão embalada</span>
+
+<span class="cm"># Usando:</span>
+<span class="dc">@audit_log</span>
+<span class="kw">def</span> <span class="fn">processar_kill</span>(event):
+    <span class="cm"># lógica de negócio limpa, sem log aqui</span>
+    <span class="kw">return</span> event.kills * <span class="nm">100</span></pre>
+        </div>
+        <div class="tip"><ic>*args</ic> captura argumentos posicionais, <ic>**kwargs</ic> captura os nomeados. Isso faz o <ic>wrapper</ic> funcionar com qualquer função independente da assinatura.</div>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">03</div>
+        <div class="step-title">Por que @wraps é obrigatório</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="compare">
+          <div class="compare-card bad">
+            <div class="compare-label">sem @wraps</div>
+            <div class="code-wrap"><pre><span class="fn">print</span>(processar_kill.__name__)
+<span class="cm"># "wrapper"  ← errado!</span>
+<span class="fn">print</span>(processar_kill.__doc__)
+<span class="cm"># None ← docstring sumiu!</span></pre></div>
+          </div>
+          <div class="compare-card good">
+            <div class="compare-label">com @wraps(func)</div>
+            <div class="code-wrap"><pre><span class="fn">print</span>(processar_kill.__name__)
+<span class="cm"># "processar_kill" ← correto</span>
+<span class="fn">print</span>(processar_kill.__doc__)
+<span class="cm"># docstring preservada</span></pre></div>
+          </div>
+        </div>
+        <div class="warn">Sem <ic>@wraps</ic>, logs de auditoria mostrariam "wrapper" como nome de todas as funções — inútil para rastrear problemas.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- NumPy -->
+<div id="s-numpy" class="section c-pink">
+  <div class="sec-hero">
+    <div class="sec-eyebrow"><span class="num">06 /</span> análise estatística</div>
+    <h2>NumPy stats</h2>
+    <p>Matemática rápida em listas de números. Faz em uma linha o que levaria um loop inteiro.</p>
+  </div>
+
+  <div class="analogy">
+    <p>Você tem uma planilha com o dano de 10.000 jogadores. Para calcular a média, poderia somar célula por célula (loop Python) ou pressionar "=MÉDIA(A1:A10000)" e ter a resposta instantânea. NumPy é esse "=MÉDIA" — opera em todos os valores de uma vez, rodando em C por baixo.</p>
+  </div>
+
+  <div class="steps">
+
+    <div class="step-card open">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">01</div>
+        <div class="step-title">Por que não usar listas Python normais?</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="compare">
+          <div class="compare-card bad">
+            <div class="compare-label">lista Python — lento</div>
+            <div class="code-wrap"><pre>damages = [<span class="nm">1200</span>, <span class="nm">1840</span>, <span class="nm">900</span>, <span class="nm">2200</span>]
+total = <span class="nm">0</span>
+<span class="kw">for</span> d <span class="kw">in</span> damages:
+    total += d
+media = total / <span class="fn">len</span>(damages)
+<span class="cm"># lento com 1 milhão de valores</span></pre></div>
+          </div>
+          <div class="compare-card good">
+            <div class="compare-label">NumPy — ~100x mais rápido</div>
+            <div class="code-wrap"><pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+damages = np.<span class="fn">array</span>([<span class="nm">1200</span>, <span class="nm">1840</span>, <span class="nm">900</span>, <span class="nm">2200</span>])
+media = np.<span class="fn">mean</span>(damages)
+<span class="cm"># opera em C — veloz com 1M valores</span></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-card open">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">02</div>
+        <div class="step-title">As funções principais no pipeline</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">numpy_stats.py</span></div>
+          <pre>kdas    = np.<span class="fn">array</span>([<span class="nm">1.2</span>, <span class="nm">3.5</span>, <span class="nm">0.8</span>, <span class="nm">5.1</span>, <span class="nm">2.9</span>, <span class="nm">4.4</span>])
+damages = np.<span class="fn">array</span>([<span class="nm">900</span>, <span class="nm">1840</span>, <span class="nm">600</span>, <span class="nm">2200</span>, <span class="nm">1500</span>, <span class="nm">1900</span>])
+
+np.<span class="fn">mean</span>(kdas)           <span class="cm"># 2.98  — média aritmética</span>
+np.<span class="fn">median</span>(kdas)         <span class="cm"># 3.2   — valor do meio (robusto a outliers)</span>
+np.<span class="fn">std</span>(kdas)            <span class="cm"># 1.49  — desvio padrão (consistência)</span>
+np.<span class="fn">min</span>(kdas)            <span class="cm"># 0.8   — pior partida</span>
+np.<span class="fn">max</span>(kdas)            <span class="cm"># 5.1   — melhor partida</span>
+np.<span class="fn">percentile</span>(kdas, <span class="nm">90</span>) <span class="cm"># 4.85  — top 10% começa aqui</span></pre>
+        </div>
+        <div class="tip"><ic>mean</ic> é sensível a outliers (um smurf deturpa a média). <ic>median</ic> é mais robusto — use para representar o desempenho típico.</div>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">03</div>
+        <div class="step-title">Filtros sem loop — boolean indexing</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="step-desc">Filtrar um array com uma condição retorna só os elementos que satisfazem:</div>
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">boolean_index.py</span></div>
+          <pre>kdas = np.<span class="fn">array</span>([<span class="nm">1.2</span>, <span class="nm">3.5</span>, <span class="nm">0.8</span>, <span class="nm">5.1</span>, <span class="nm">2.9</span>])
+
+<span class="cm"># Máscara: array de True/False</span>
+mascara = kdas > <span class="nm">3</span>
+<span class="fn">print</span>(mascara)        <span class="cm"># [False  True False  True False]</span>
+<span class="fn">print</span>(kdas[mascara])  <span class="cm"># [3.5  5.1] — só os True</span>
+
+<span class="cm"># Contar quantos acima da média:</span>
+media = np.<span class="fn">mean</span>(kdas)
+acima = np.<span class="fn">sum</span>(kdas > media)  <span class="cm"># True conta como 1</span>
+<span class="fn">print</span>(<span class="st">f"{acima} jogadores acima da média"</span>)</pre>
+        </div>
+        <div class="tip">A "máscara" é um array de <ic>True/False</ic>. Ao usá-la como índice (<ic>kdas[mascara]</ic>), o NumPy retorna só os elementos onde é <ic>True</ic> — sem nenhum loop.</div>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">04</div>
+        <div class="step-title">np.where e np.argsort — classificar e rankear</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">rank_classify.py</span></div>
+          <pre>kdas = np.<span class="fn">array</span>([<span class="nm">1.2</span>, <span class="nm">3.5</span>, <span class="nm">0.8</span>, <span class="nm">5.1</span>, <span class="nm">2.9</span>])
+
+<span class="cm"># np.where: se/senão vetorizado</span>
+tiers = np.<span class="fn">where</span>(kdas >= <span class="nm">3.0</span>, <span class="st">"Gold"</span>, <span class="st">"Silver"</span>)
+<span class="fn">print</span>(tiers)
+<span class="cm"># ['Silver' 'Gold' 'Silver' 'Gold' 'Silver']</span>
+
+<span class="cm"># np.argsort: índices que ordenariam o array</span>
+ordem = np.<span class="fn">argsort</span>(kdas)[::-<span class="nm">1</span>]  <span class="cm"># [::-1] = decrescente</span>
+<span class="fn">print</span>(<span class="st">"ranking:"</span>, kdas[ordem])
+<span class="cm"># [5.1  3.5  2.9  1.2  0.8] — do melhor ao pior</span></pre>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</main>
+</div>
+
+<script>
+function go(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('s-' + id).classList.add('active');
+  const navMap = { dc:'c-purple', enum:'c-teal', prop:'c-coral', cache:'c-amber', deco:'c-blue', numpy:'c-pink' };
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.classList.contains(navMap[id])) n.classList.add('active');
+  });
+}
+
+function toggle(header) {
+  const card = header.parentElement;
+  card.classList.toggle('open');
+}
+</script>
+</body>
+</html>

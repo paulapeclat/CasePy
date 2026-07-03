@@ -1,0 +1,2077 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pipeline de Dados — Guia para Iniciantes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #080b12;
+  --bg2:      #0d1120;
+  --bg3:      #111827;
+  --border:   #1e2740;
+  --border2:  #2a3555;
+  --text:     #e2e8f0;
+  --muted:    #64748b;
+  --dim:      #334155;
+
+  --purple:   #818cf8;
+  --purple-d: #3730a3;
+  --purple-bg:#1a1040;
+
+  --teal:     #34d399;
+  --teal-d:   #065f46;
+  --teal-bg:  #021f15;
+
+  --coral:    #fb923c;
+  --coral-d:  #7c2d12;
+  --coral-bg: #1f0d05;
+
+  --amber:    #fbbf24;
+  --amber-d:  #78350f;
+  --amber-bg: #1a0e02;
+
+  --blue:     #60a5fa;
+  --blue-d:   #1e3a5f;
+  --blue-bg:  #03101e;
+
+  --pink:     #f472b6;
+  --pink-d:   #701a4f;
+  --pink-bg:  #1a0512;
+
+  --green:    #4ade80;
+  --green-bg: #021a08;
+
+  --cyan:     #22d3ee;
+  --cyan-bg:  #011820;
+
+  --orange:   #fb923c;
+  --orange-bg:#1f0d05;
+
+  --rose:     #fb7185;
+  --rose-bg:  #1f0508;
+
+  --font-display: 'Syne', sans-serif;
+  --font-body:    'DM Sans', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.7;
+  min-height: 100vh;
+}
+
+/* ── SCROLLBAR ─────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ── LAYOUT ─────────────────────────────────────────── */
+.shell {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 100vh;
+}
+
+/* ── SIDEBAR ─────────────────────────────────────────── */
+.sidebar {
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  padding: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.brand {
+  padding: 28px 24px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.brand-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.brand-tag::before {
+  content: '';
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--teal);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .3; }
+}
+.brand h1 {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+}
+.brand p {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+.nav-section {
+  padding: 16px 16px 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 20px;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: all .15s;
+  text-decoration: none;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 400;
+}
+.nav-item:hover {
+  color: var(--text);
+  background: var(--bg3);
+}
+.nav-item.active {
+  color: var(--text);
+  border-left-color: currentColor;
+  background: var(--bg3);
+  font-weight: 500;
+}
+.nav-item.active.c-purple { border-left-color: var(--purple); color: var(--purple); }
+.nav-item.active.c-teal   { border-left-color: var(--teal);   color: var(--teal);   }
+.nav-item.active.c-coral  { border-left-color: var(--coral);  color: var(--coral);  }
+.nav-item.active.c-amber  { border-left-color: var(--amber);  color: var(--amber);  }
+.nav-item.active.c-blue   { border-left-color: var(--blue);   color: var(--blue);   }
+.nav-item.active.c-pink   { border-left-color: var(--pink);   color: var(--pink);   }
+.nav-item.active.c-green  { border-left-color: var(--green);  color: var(--green);  }
+.nav-item.active.c-cyan   { border-left-color: var(--cyan);   color: var(--cyan);   }
+.nav-item.active.c-orange { border-left-color: var(--orange); color: var(--orange); }
+.nav-item.active.c-rose   { border-left-color: var(--rose);   color: var(--rose);   }
+
+.nav-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  opacity: .5;
+}
+.nav-item.active .nav-dot { opacity: 1; }
+.c-purple .nav-dot { background: var(--purple); }
+.c-teal   .nav-dot { background: var(--teal);   }
+.c-coral  .nav-dot { background: var(--coral);  }
+.c-amber  .nav-dot { background: var(--amber);  }
+.c-blue   .nav-dot { background: var(--blue);   }
+.c-pink   .nav-dot { background: var(--pink);   }
+.c-green  .nav-dot { background: var(--green);  }
+.c-cyan   .nav-dot { background: var(--cyan);   }
+.c-orange .nav-dot { background: var(--orange); }
+.c-rose   .nav-dot { background: var(--rose);   }
+
+.order-badge {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--dim);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 1px 6px;
+  border-radius: 10px;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--dim);
+  font-family: var(--font-mono);
+}
+
+/* ── MAIN ─────────────────────────────────────────────── */
+.main {
+  overflow-y: auto;
+}
+
+.section {
+  display: none;
+  padding: 48px 56px;
+  max-width: 860px;
+  animation: fadeIn .25s ease;
+}
+.section.active { display: block; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ── SECTION HERO ─────────────────────────────────────── */
+.sec-hero {
+  margin-bottom: 36px;
+}
+.sec-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.sec-eyebrow .num {
+  font-size: 10px;
+  opacity: .5;
+}
+.sec-hero h2 {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1.15;
+  margin-bottom: 8px;
+}
+.sec-hero p {
+  font-size: 15px;
+  color: var(--muted);
+  max-width: 560px;
+  line-height: 1.65;
+}
+
+/* ── ANALOGY ──────────────────────────────────────────── */
+.analogy {
+  border-radius: 10px;
+  padding: 18px 22px;
+  margin: 0 0 32px;
+  border: 1px solid;
+  position: relative;
+  overflow: hidden;
+}
+.analogy::before {
+  content: '💡 analogia';
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  opacity: .6;
+  display: block;
+  margin-bottom: 8px;
+}
+.analogy p {
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+/* ── STEPS ────────────────────────────────────────────── */
+.steps { display: flex; flex-direction: column; gap: 4px; }
+
+.step-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color .15s;
+}
+.step-card:hover { border-color: var(--border2); }
+
+.step-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  cursor: pointer;
+  background: var(--bg2);
+  user-select: none;
+}
+.step-num {
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.step-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  flex: 1;
+}
+.step-toggle {
+  font-size: 16px;
+  color: var(--muted);
+  transition: transform .2s;
+  line-height: 1;
+}
+.step-card.open .step-toggle { transform: rotate(180deg); }
+
+.step-body {
+  display: none;
+  padding: 0 20px 20px;
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+}
+.step-card.open .step-body { display: block; }
+
+.step-desc {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 14px 0 10px;
+  line-height: 1.65;
+}
+
+/* ── CODE BLOCK ───────────────────────────────────────── */
+.code-wrap {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 12px 0;
+}
+.code-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--bg3);
+  border-bottom: 1px solid var(--border);
+}
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+.dot.r { background: #ff5f57; }
+.dot.y { background: #febc2e; }
+.dot.g { background: #28c840; }
+.code-filename {
+  margin-left: 4px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--dim);
+}
+pre {
+  padding: 16px 18px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.75;
+  overflow-x: auto;
+  white-space: pre;
+}
+.cm { color: #4a5568; }       /* comment */
+.kw { color: #93c5fd; }       /* keyword */
+.fn { color: #86efac; }       /* function/class */
+.st { color: #fca5a5; }       /* string */
+.nm { color: #fdba74; }       /* number */
+.dc { color: #c4b5fd; }       /* decorator */
+.tp { color: #67e8f9; }       /* type */
+
+/* ── TIP / WARN ────────────────────────────────────────── */
+.tip, .warn {
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 12px 0;
+  font-size: 13px;
+  line-height: 1.65;
+  border: 1px solid;
+}
+.tip  { background: rgba(52,211,153,.07); border-color: rgba(52,211,153,.2); color: #86efac; }
+.warn { background: rgba(248,113,113,.07); border-color: rgba(248,113,113,.2); color: #fca5a5; }
+.tip::before  { content: '✓  '; font-weight: 600; }
+.warn::before { content: '⚠  '; font-weight: 600; }
+
+/* ── COMPARE GRID ─────────────────────────────────────── */
+.compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 12px 0;
+}
+.compare-card {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.compare-label {
+  padding: 7px 12px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+}
+.compare-card .code-wrap { border: none; border-radius: 0; margin: 0; }
+.compare-card .code-bar  { display: none; }
+.compare-card pre { font-size: 11.5px; padding: 12px 14px; }
+.bad  .compare-label { background: rgba(248,113,113,.08); color: #f87171; }
+.good .compare-label { background: rgba(52,211,153,.08);  color: #34d399; }
+
+/* ── FORMULA ROW ──────────────────────────────────────── */
+.formula-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 12px 0;
+}
+.formula-card {
+  border-radius: 10px;
+  padding: 16px;
+  border: 1px solid;
+  text-align: center;
+}
+.formula-name { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 6px; opacity: .7; }
+.formula-eq   { font-family: var(--font-mono); font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+.formula-desc { font-size: 11px; line-height: 1.55; opacity: .75; }
+
+/* ── FLOW ─────────────────────────────────────────────── */
+.flow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 16px 0;
+  padding: 16px 18px;
+  background: var(--bg3);
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+.flow-step {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.flow-arrow { color: var(--dim); font-size: 14px; padding: 0 2px; }
+
+/* ── INLINE CODE ──────────────────────────────────────── */
+ic {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  padding: 1px 6px;
+  border-radius: 4px;
+  color: var(--text);
+}
+
+/* ── COLORS PER SECTION ───────────────────────────────── */
+.c-purple .sec-eyebrow,
+.c-purple .sec-hero h2 { color: var(--purple); }
+.c-teal   .sec-eyebrow,
+.c-teal   .sec-hero h2 { color: var(--teal);   }
+.c-coral  .sec-eyebrow,
+.c-coral  .sec-hero h2 { color: var(--coral);  }
+.c-amber  .sec-eyebrow,
+.c-amber  .sec-hero h2 { color: var(--amber);  }
+.c-blue   .sec-eyebrow,
+.c-blue   .sec-hero h2 { color: var(--blue);   }
+.c-pink   .sec-eyebrow,
+.c-pink   .sec-hero h2 { color: var(--pink);   }
+.c-green  .sec-eyebrow,
+.c-green  .sec-hero h2 { color: var(--green);  }
+.c-cyan   .sec-eyebrow,
+.c-cyan   .sec-hero h2 { color: var(--cyan);   }
+.c-orange .sec-eyebrow,
+.c-orange .sec-hero h2 { color: var(--orange); }
+.c-rose   .sec-eyebrow,
+.c-rose   .sec-hero h2 { color: var(--rose);   }
+
+.c-purple .step-num { background: var(--purple-bg); color: var(--purple); }
+.c-teal   .step-num { background: var(--teal-bg);   color: var(--teal);   }
+.c-coral  .step-num { background: var(--coral-bg);  color: var(--coral);  }
+.c-amber  .step-num { background: var(--amber-bg);  color: var(--amber);  }
+.c-blue   .step-num { background: var(--blue-bg);   color: var(--blue);   }
+.c-pink   .step-num { background: var(--pink-bg);   color: var(--pink);   }
+.c-green  .step-num { background: var(--green-bg);  color: var(--green);  }
+.c-cyan   .step-num { background: var(--cyan-bg);   color: var(--cyan);   }
+.c-orange .step-num { background: var(--orange-bg); color: var(--orange); }
+.c-rose   .step-num { background: var(--rose-bg);   color: var(--rose);   }
+
+.c-purple .analogy { background: var(--purple-bg); border-color: rgba(129,140,248,.2); color: #c4b5fd; }
+.c-teal   .analogy { background: var(--teal-bg);   border-color: rgba(52,211,153,.2);  color: #6ee7b7; }
+.c-coral  .analogy { background: var(--coral-bg);  border-color: rgba(251,146,60,.2);  color: #fdba74; }
+.c-amber  .analogy { background: var(--amber-bg);  border-color: rgba(251,191,36,.2);  color: #fcd34d; }
+.c-blue   .analogy { background: var(--blue-bg);   border-color: rgba(96,165,250,.2);  color: #93c5fd; }
+.c-pink   .analogy { background: var(--pink-bg);   border-color: rgba(244,114,182,.2); color: #f9a8d4; }
+.c-green  .analogy { background: var(--green-bg);  border-color: rgba(74,222,128,.2);  color: #86efac; }
+
+/* ── FLOWCHART ─────────────────────────────────────── */
+.fc-wrap { overflow-x: auto; padding-bottom: 8px; }
+.fc-svg  { display: block; }
+
+/* ── LEGEND ─────────────────────────────────────────── */
+.legend { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0; }
+.legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+.legend-shape { flex-shrink: 0; }
+
+/* ── MOCKUP ─────────────────────────────────────────── */
+.mockup-screen {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.mockup-titlebar {
+  background: var(--bg2);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.mockup-body { padding: 0; }
+
+.pipeline-mockup {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1px;
+  background: var(--border);
+}
+.pm-row {
+  background: var(--bg3);
+  display: grid;
+  grid-template-columns: 180px 1fr 100px;
+  gap: 0;
+  align-items: center;
+  min-height: 52px;
+}
+.pm-row.header { background: var(--bg2); min-height: 36px; }
+.pm-cell {
+  padding: 10px 14px;
+  font-size: 12px;
+  border-right: 1px solid var(--border);
+}
+.pm-cell:last-child { border-right: none; }
+.pm-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 500;
+}
+.pm-bar-wrap { height: 6px; background: var(--bg2); border-radius: 3px; overflow: hidden; margin-top: 4px; }
+.pm-bar { height: 100%; border-radius: 3px; }
+
+/* ── MIND MAP ─────────────────────────────────────────── */
+.mmap-wrap { overflow-x: auto; padding: 8px 0 16px; }
+
+/* ── HOME ─────────────────────────────────────────────── */
+#home {
+  display: block;
+  padding: 48px 56px;
+  max-width: 860px;
+}
+.home-tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--teal);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.home-tag span {
+  display: inline-block;
+  width: 24px;
+  height: 1px;
+  background: var(--teal);
+}
+.home h1 {
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+.home h1 em {
+  font-style: normal;
+  color: var(--purple);
+}
+.home-sub {
+  font-size: 16px;
+  color: var(--muted);
+  max-width: 520px;
+  line-height: 1.7;
+  margin-bottom: 36px;
+}
+
+.order-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 36px;
+}
+.order-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 18px;
+  cursor: pointer;
+  transition: border-color .15s, transform .15s;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+.order-card:hover { border-color: var(--border2); transform: translateY(-1px); }
+.order-n {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--dim);
+  padding-top: 3px;
+  min-width: 16px;
+}
+.order-card-title {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 3px;
+}
+.order-card-desc {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.pipeline-flow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 18px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  flex-wrap: wrap;
+  font-size: 12px;
+}
+.pf-item {
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.pf-arrow { color: var(--dim); }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+<!-- ── SIDEBAR ── -->
+<nav class="sidebar">
+  <div class="brand">
+    <div class="brand-tag">pipeline · ao vivo</div>
+    <h1>Game Data Pipeline</h1>
+    <p>Guia para iniciantes</p>
+  </div>
+
+  <div class="nav-section">índice</div>
+
+  <a class="nav-item active c-purple" onclick="go('dc')">
+    <span class="nav-dot"></span>
+    @dataclass
+    <span class="order-badge">01</span>
+  </a>
+  <a class="nav-item c-teal" onclick="go('enum')">
+    <span class="nav-dot"></span>
+    Enum
+    <span class="order-badge">02</span>
+  </a>
+  <a class="nav-item c-coral" onclick="go('prop')">
+    <span class="nav-dot"></span>
+    @property
+    <span class="order-badge">03</span>
+  </a>
+  <a class="nav-item c-amber" onclick="go('cache')">
+    <span class="nav-dot"></span>
+    Cache
+    <span class="order-badge">04</span>
+  </a>
+  <a class="nav-item c-blue" onclick="go('deco')">
+    <span class="nav-dot"></span>
+    Decoradores
+    <span class="order-badge">05</span>
+  </a>
+  <a class="nav-item c-pink" onclick="go('numpy')">
+    <span class="nav-dot"></span>
+    NumPy stats
+    <span class="order-badge">06</span>
+  </a>
+
+  <div class="nav-section" style="margin-top:12px">conceitos extras</div>
+
+  <a class="nav-item c-green" onclick="go('cicd')">
+    <span class="nav-dot"></span>
+    CI/CD
+    <span class="order-badge">07</span>
+  </a>
+
+  <div class="nav-section" style="margin-top:12px">visuais</div>
+
+  <a class="nav-item c-cyan" onclick="go('fluxo')">
+    <span class="nav-dot"></span>
+    Fluxograma
+  </a>
+  <a class="nav-item c-orange" onclick="go('mockup')">
+    <span class="nav-dot"></span>
+    Mockup do sistema
+  </a>
+  <a class="nav-item c-rose" onclick="go('mapa')">
+    <span class="nav-dot"></span>
+    Mapa mental
+  </a>
+
+  <div class="nav-section" style="margin-top:12px">camadas do pipeline</div>
+  <div style="padding:8px 20px 16px;font-size:12px;color:var(--dim);line-height:1.9">
+    Servidor de jogo<br>
+    → Validação de eventos<br>
+    → Cálculo de métricas<br>
+    → Cache de resultados<br>
+    → Auditoria & log<br>
+    → Análise estatística
+  </div>
+
+  <div class="sidebar-footer">
+    python 3.11+ · numpy · functools
+  </div>
+</nav>
+
+<!-- ── MAIN ── -->
+<main class="main">
+
+<!-- @dataclass -->
+<div id="s-dc" class="section c-purple active">
+  <div class="sec-hero">
+    <div class="sec-eyebrow">
+      <span class="num">01 /</span> estrutura de dados
+    </div>
+    <h2>@dataclass</h2>
+    <p>Uma forma elegante de criar classes que só guardam dados, sem escrever código repetitivo.</p>
+  </div>
+
+  <div class="analogy">
+    <p>Imagine uma ficha de cadastro de jogador numa LAN house. Ela tem campos fixos: nome, CPF, telefone. Você não precisa inventar os campos toda vez — a ficha já define o que deve ser preenchido. <ic>@dataclass</ic> faz exatamente isso: define a estrutura dos seus dados em Python.</p>
+  </div>
+
+  <div class="steps">
+
+    <div class="step-card open">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">01</div>
+        <div class="step-title">O problema sem @dataclass</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="step-desc">Para representar um evento de kill, você precisaria escrever tudo na mão — muito código para guardar 4 campos:</div>
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">sem_dataclass.py</span></div>
+          <pre><span class="kw">class</span> <span class="fn">KillEvent</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, player_id, kills, damage, timestamp):
+        self.player_id = player_id
+        self.kills     = kills
+        self.damage    = damage
+        self.timestamp = timestamp
+
+    <span class="kw">def</span> <span class="fn">__repr__</span>(self):  <span class="cm"># pra aparecer legível no print</span>
+        <span class="kw">return</span> <span class="st">f"KillEvent({self.player_id}, kills={self.kills})"</span>
+
+<span class="cm"># 9 linhas para guardar 4 campos — todo esse trabalho manual</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-card open">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">02</div>
+        <div class="step-title">A solução com @dataclass</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="step-desc">Python gera o <ic>__init__</ic>, o <ic>__repr__</ic> e a comparação automaticamente:</div>
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">com_dataclass.py</span></div>
+          <pre><span class="kw">from</span> dataclasses <span class="kw">import</span> dataclass
+
+<span class="dc">@dataclass</span>
+<span class="kw">class</span> <span class="fn">KillEvent</span>:
+    player_id: <span class="tp">str</span>
+    kills:     <span class="tp">int</span>
+    damage:    <span class="tp">int</span>
+    timestamp: <span class="tp">float</span>
+
+<span class="cm"># Usando:</span>
+ev = <span class="fn">KillEvent</span>(player_id=<span class="st">"PLR-001"</span>, kills=<span class="nm">3</span>, damage=<span class="nm">1800</span>, timestamp=<span class="nm">1700000000.0</span>)
+<span class="fn">print</span>(ev)
+<span class="cm"># KillEvent(player_id='PLR-001', kills=3, damage=1800, timestamp=1700000000.0)</span></pre>
+        </div>
+        <div class="tip">O <ic>: str</ic>, <ic>: int</ic> depois do nome do campo é a <strong>type hint</strong>. Documenta o tipo esperado. Python não bloqueia em runtime, mas o VS Code avisa se você passar o tipo errado.</div>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">03</div>
+        <div class="step-title">Valor padrão nos campos</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="step-desc">Campos opcionais recebem valor padrão com <ic>=</ic>:</div>
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">valor_padrao.py</span></div>
+          <pre><span class="dc">@dataclass</span>
+<span class="kw">class</span> <span class="fn">KillEvent</span>:
+    player_id: <span class="tp">str</span>
+    kills:     <span class="tp">int</span>
+    damage:    <span class="tp">int</span>
+    timestamp: <span class="tp">float</span>
+    validated: <span class="tp">bool</span> = <span class="kw">False</span>  <span class="cm"># opcional, padrão False</span>
+
+ev = <span class="fn">KillEvent</span>(<span class="st">"PLR-001"</span>, <span class="nm">3</span>, <span class="nm">1800</span>, <span class="nm">1700000000.0</span>)
+<span class="fn">print</span>(ev.validated)  <span class="cm"># False</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">04</div>
+        <div class="step-title">frozen=True — imutável como um recibo</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="step-desc">Eventos já registrados não deveriam ser alterados. <ic>frozen=True</ic> proíbe qualquer modificação:</div>
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">frozen.py</span></div>
+          <pre><span class="dc">@dataclass</span>(frozen=<span class="kw">True</span>)
+<span class="kw">class</span> <span class="fn">KillEvent</span>:
+    player_id: <span class="tp">str</span>
+    kills:     <span class="tp">int</span>
+
+ev = <span class="fn">KillEvent</span>(<span class="st">"PLR-001"</span>, <span class="nm">3</span>)
+ev.kills = <span class="nm">99</span>  <span class="cm"># FrozenInstanceError — não pode mudar!</span></pre>
+        </div>
+        <div class="tip">Use <ic>frozen=True</ic> para eventos do passado (auditoria). Use sem <ic>frozen</ic> para objetos que ainda estão sendo construídos durante a partida.</div>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">05</div>
+        <div class="step-title">__post_init__ — validar na criação</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="step-desc">Método especial que roda automaticamente depois do <ic>__init__</ic>. Ideal para validar os campos:</div>
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">post_init.py</span></div>
+          <pre><span class="dc">@dataclass</span>
+<span class="kw">class</span> <span class="fn">KillEvent</span>:
+    player_id: <span class="tp">str</span>
+    kills:     <span class="tp">int</span>
+    damage:    <span class="tp">int</span>
+
+    <span class="kw">def</span> <span class="fn">__post_init__</span>(self):
+        <span class="kw">if not</span> self.player_id:
+            <span class="kw">raise</span> <span class="fn">ValueError</span>(<span class="st">"player_id não pode ser vazio"</span>)
+        <span class="kw">if</span> self.damage < <span class="nm">0</span>:
+            <span class="kw">raise</span> <span class="fn">ValueError</span>(<span class="st">f"damage inválido: {self.damage}"</span>)
+        <span class="kw">if</span> self.kills < <span class="nm">0</span>:
+            <span class="kw">raise</span> <span class="fn">ValueError</span>(<span class="st">f"kills não pode ser negativo: {self.kills}"</span>)
+
+<span class="cm"># Evento inválido é rejeitado na criação:</span>
+ev = <span class="fn">KillEvent</span>(<span class="st">"PLR-001"</span>, kills=<span class="nm">-1</span>, damage=<span class="nm">500</span>)
+<span class="cm"># ValueError: kills não pode ser negativo: -1</span></pre>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Enum -->
+<div id="s-enum" class="section c-teal">
+  <div class="sec-hero">
+    <div class="sec-eyebrow"><span class="num">02 /</span> valores fixos</div>
+    <h2>Enum</h2>
+    <p>Evita erros de digitação em strings e deixa o código mais legível e seguro.</p>
+  </div>
+
+  <div class="analogy">
+    <p>Imagine um formulário com a pergunta "Resultado: ( ) Positivo  ( ) Negativo". Você só pode marcar uma das duas — não existe "Positivo" escrito diferente. <ic>Enum</ic> define o conjunto fixo de valores possíveis para um campo.</p>
+  </div>
+
+  <div class="steps">
+
+    <div class="step-card open">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">01</div>
+        <div class="step-title">O problema sem Enum</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="step-desc">Tipos de evento como strings soltas causam bugs silenciosos:</div>
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">sem_enum.py</span></div>
+          <pre>ev1 = {<span class="st">"type"</span>: <span class="st">"kill"</span>}   <span class="cm"># funciona</span>
+ev2 = {<span class="st">"type"</span>: <span class="st">"klil"</span>}   <span class="cm"># typo — ninguém avisa</span>
+ev3 = {<span class="st">"type"</span>: <span class="st">"Kill"</span>}   <span class="cm"># maiúscula — falha silenciosa no if</span>
+ev4 = {<span class="st">"type"</span>: <span class="st">"KILL"</span>}   <span class="cm"># qual é o certo afinal?</span></pre>
+        </div>
+        <div class="warn">Erros de string só aparecem em runtime — muitas vezes horas depois, num log difícil de rastrear.</div>
+      </div>
+    </div>
+
+    <div class="step-card open">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">02</div>
+        <div class="step-title">A solução com Enum</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">event_type.py</span></div>
+          <pre><span class="kw">from</span> enum <span class="kw">import</span> Enum
+
+<span class="kw">class</span> <span class="fn">EventType</span>(Enum):
+    KILL        = <span class="st">"kill"</span>
+    DAMAGE      = <span class="st">"damage"</span>
+    SESSION_END = <span class="st">"session_end"</span>
+    ASSIST      = <span class="st">"assist"</span>
+
+<span class="cm"># Usando — sem aspas, sem typo:</span>
+ev_type = EventType.KILL
+<span class="fn">print</span>(ev_type)           <span class="cm"># EventType.KILL</span>
+<span class="fn">print</span>(ev_type.value)     <span class="cm"># "kill"</span>
+<span class="fn">print</span>(ev_type == EventType.KILL)  <span class="cm"># True</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">03</div>
+        <div class="step-title">Usando Enum com @dataclass e match/case</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">game_event.py</span></div>
+          <pre><span class="dc">@dataclass</span>
+<span class="kw">class</span> <span class="fn">GameEvent</span>:
+    player_id:  <span class="tp">str</span>
+    event_type: <span class="tp">EventType</span>  <span class="cm"># só aceita valores do Enum</span>
+    value:      <span class="tp">int</span>
+
+<span class="cm"># Criando eventos com segurança:</span>
+ev = <span class="fn">GameEvent</span>(<span class="st">"PLR-001"</span>, EventType.KILL, <span class="nm">3</span>)
+
+<span class="cm"># Despachando por tipo (Python 3.10+):</span>
+<span class="kw">match</span> ev.event_type:
+    <span class="kw">case</span> EventType.KILL:
+        <span class="fn">processar_kill</span>(ev)
+    <span class="kw">case</span> EventType.DAMAGE:
+        <span class="fn">processar_dano</span>(ev)
+    <span class="kw">case</span> EventType.SESSION_END:
+        <span class="fn">fechar_sessao</span>(ev)</pre>
+        </div>
+        <div class="tip"><ic>match/case</ic> com Enum é o padrão moderno. Se chegar um tipo novo que não existe, o código levanta erro imediatamente — melhor que falhar silenciosamente.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- @property -->
+<div id="s-prop" class="section c-coral">
+  <div class="sec-hero">
+    <div class="sec-eyebrow"><span class="num">03 /</span> cálculo lazy</div>
+    <h2>@property</h2>
+    <p>Transforma um método em algo que parece um atributo simples. Recalcula sempre que você acessa.</p>
+  </div>
+
+  <div class="analogy">
+    <p>Seu celular mostra "bateria restante em horas". Isso não é um campo fixo — é calculado na hora a partir da bateria atual dividida pelo consumo médio. Mas pra você aparece como se fosse um número simples. <ic>@property</ic> faz o mesmo: parece atributo, executa cálculo por baixo.</p>
+  </div>
+
+  <div class="steps">
+
+    <div class="step-card open">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">01</div>
+        <div class="step-title">O problema: campo salvo vs calculado</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="step-desc">Se você salvar o KDA como campo, ele fica desatualizado quando kills mudam:</div>
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">problema.py</span></div>
+          <pre><span class="kw">class</span> <span class="fn">Player</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, kills, deaths, assists):
+        self.kills   = kills
+        self.deaths  = deaths
+        self.assists = assists
+        self.kda     = (kills + assists) / <span class="fn">max</span>(deaths, <span class="nm">1</span>)
+        <span class="cm"># Problema: player.kills += 1 não atualiza self.kda!</span>
+
+p = <span class="fn">Player</span>(<span class="nm">5</span>, <span class="nm">2</span>, <span class="nm">1</span>)
+p.kills += <span class="nm">3</span>
+<span class="fn">print</span>(p.kda)  <span class="cm"># ainda mostra o valor antigo: 3.0 :(</span></pre>
+        </div>
+        <div class="warn">O KDA calculado uma vez no <ic>__init__</ic> nunca se atualiza automaticamente. Fica "stale" (obsoleto).</div>
+      </div>
+    </div>
+
+    <div class="step-card open">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">02</div>
+        <div class="step-title">A solução com @property</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">player_stats.py</span></div>
+          <pre><span class="dc">@dataclass</span>
+<span class="kw">class</span> <span class="fn">Player</span>:
+    kills:   <span class="tp">int</span>
+    deaths:  <span class="tp">int</span>
+    assists: <span class="tp">int</span>
+    wins:    <span class="tp">int</span>
+    games:   <span class="tp">int</span>
+
+    <span class="dc">@property</span>
+    <span class="kw">def</span> <span class="fn">kda</span>(self) -> <span class="tp">float</span>:
+        <span class="kw">return</span> (self.kills + self.assists) / <span class="fn">max</span>(self.deaths, <span class="nm">1</span>)
+
+    <span class="dc">@property</span>
+    <span class="kw">def</span> <span class="fn">win_rate</span>(self) -> <span class="tp">float</span>:
+        <span class="kw">return</span> self.wins / <span class="fn">max</span>(self.games, <span class="nm">1</span>)
+
+<span class="cm"># Usando — parece campo, é cálculo:</span>
+p = <span class="fn">Player</span>(kills=<span class="nm">8</span>, deaths=<span class="nm">2</span>, assists=<span class="nm">3</span>, wins=<span class="nm">6</span>, games=<span class="nm">10</span>)
+<span class="fn">print</span>(p.kda)       <span class="cm"># 5.5  — sem parênteses!</span>
+<span class="fn">print</span>(p.win_rate)  <span class="cm"># 0.6</span>
+p.kills += <span class="nm">2</span>
+<span class="fn">print</span>(p.kda)       <span class="cm"># 6.5  — atualizado automaticamente!</span></pre>
+        </div>
+        <div class="tip">Note que você chama <ic>p.kda</ic> sem parênteses, como se fosse um atributo. O <ic>@property</ic> intercepta a leitura e executa o método por baixo.</div>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">03</div>
+        <div class="step-title">As três fórmulas do pipeline</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="formula-row">
+          <div class="formula-card" style="background:var(--coral-bg);border-color:rgba(251,146,60,.2)">
+            <div class="formula-name" style="color:var(--coral)">KDA</div>
+            <div class="formula-eq" style="color:var(--coral)">(K + A) / max(D,1)</div>
+            <div class="formula-desc" style="color:#fdba74">Kills + Assists / Deaths. max(D,1) evita divisão por zero.</div>
+          </div>
+          <div class="formula-card" style="background:var(--coral-bg);border-color:rgba(251,146,60,.2)">
+            <div class="formula-name" style="color:var(--coral)">Win rate</div>
+            <div class="formula-eq" style="color:var(--coral)">wins / total_games</div>
+            <div class="formula-desc" style="color:#fdba74">Proporção de vitórias. ×100 para percentual.</div>
+          </div>
+          <div class="formula-card" style="background:var(--coral-bg);border-color:rgba(251,146,60,.2)">
+            <div class="formula-name" style="color:var(--coral)">Dano médio</div>
+            <div class="formula-eq" style="color:var(--coral)">sum(dmg) / games</div>
+            <div class="formula-desc" style="color:#fdba74">Total de dano por partidas jogadas. Indica agressividade.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Cache -->
+<div id="s-cache" class="section c-amber">
+  <div class="sec-hero">
+    <div class="sec-eyebrow"><span class="num">04 /</span> memoização</div>
+    <h2>Cache</h2>
+    <p>Como evitar sobrecarregar o banco de dados repetindo os mesmos cálculos caros.</p>
+  </div>
+
+  <div class="analogy">
+    <p>Imagine que você pergunta pro Google "capital do Brasil" e ele vai no banco de dados toda vez. Absurdo — a resposta nunca muda. O Google <em>memoriza</em> respostas frequentes. Cache é isso: guardar o resultado de algo caro para não refazer quando a pergunta é a mesma.</p>
+  </div>
+
+  <div class="flow">
+    <div class="flow-step">requisição de métrica</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step" style="border-color:var(--amber);color:var(--amber)">cache hit?</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step" style="border-color:var(--teal);color:var(--teal)">sim → retorna direto</div>
+    <div class="flow-arrow" style="opacity:.3">|</div>
+    <div class="flow-step" style="opacity:.6">não → calcula no banco</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">salva no cache</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">retorna resultado</div>
+  </div>
+
+  <div class="steps">
+
+    <div class="step-card open">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">01</div>
+        <div class="step-title">@lru_cache — o mais simples</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="step-desc">Para funções puras (mesmo input = mesmo output), use <ic>@lru_cache</ic>:</div>
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">lru_cache.py</span></div>
+          <pre><span class="kw">from</span> functools <span class="kw">import</span> lru_cache
+
+<span class="dc">@lru_cache</span>(maxsize=<span class="nm">256</span>)
+<span class="kw">def</span> <span class="fn">calcular_rank_historico</span>(player_id: <span class="tp">str</span>) -> <span class="tp">str</span>:
+    <span class="cm"># Simula consulta pesada ao banco</span>
+    historico = <span class="fn">buscar_banco</span>(player_id)  <span class="cm"># caro!</span>
+    <span class="kw">return</span> <span class="fn">processar_rank</span>(historico)
+
+<span class="cm"># 1ª chamada: vai ao banco (lento)</span>
+rank = <span class="fn">calcular_rank_historico</span>(<span class="st">"PLR-001"</span>)
+
+<span class="cm"># 2ª chamada com mesmo id: retorna do cache (instantâneo!)</span>
+rank = <span class="fn">calcular_rank_historico</span>(<span class="st">"PLR-001"</span>)
+
+<span class="fn">print</span>(<span class="fn">calcular_rank_historico</span>.cache_info())
+<span class="cm"># CacheInfo(hits=1, misses=1, maxsize=256, currsize=1)</span></pre>
+        </div>
+        <div class="tip"><ic>maxsize=256</ic> = guarda no máximo 256 resultados. Quando enche, descarta o <strong>menos recentemente usado</strong> (LRU). Passe <ic>maxsize=None</ic> para guardar tudo — use com cautela.</div>
+      </div>
+    </div>
+
+    <div class="step-card open">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">02</div>
+        <div class="step-title">Cache com TTL — para dados que mudam</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="step-desc">KDA muda a cada partida. Precisamos de cache que expira após um tempo:</div>
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">ttl_cache.py</span></div>
+          <pre><span class="kw">import</span> time
+
+_cache: <span class="tp">dict</span> = {}
+TTL = <span class="nm">300</span>  <span class="cm"># 5 minutos em segundos</span>
+
+<span class="kw">def</span> <span class="fn">get_kda</span>(player_id: <span class="tp">str</span>) -> <span class="tp">float</span>:
+    agora = <span class="fn">time.time</span>()
+
+    <span class="cm"># Está no cache e ainda não expirou?</span>
+    <span class="kw">if</span> player_id <span class="kw">in</span> _cache:
+        valor, salvo_em = _cache[player_id]
+        <span class="kw">if</span> agora - salvo_em < TTL:
+            <span class="fn">print</span>(<span class="st">"cache hit!"</span>)
+            <span class="kw">return</span> valor  <span class="cm"># retorna sem ir ao banco</span>
+
+    <span class="cm"># Cache vazio ou expirado: recalcula</span>
+    kda = <span class="fn">calcular_kda_no_banco</span>(player_id)
+    _cache[player_id] = (kda, agora)  <span class="cm"># guarda com timestamp</span>
+    <span class="kw">return</span> kda</pre>
+        </div>
+        <div class="tip">A lógica é sempre: 1) existe no cache? 2) ainda é válido? Se sim, retorna. Se não, calcula, salva e retorna.</div>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">03</div>
+        <div class="step-title">Quando invalidar o cache</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">invalidar.py</span></div>
+          <pre><span class="kw">def</span> <span class="fn">registrar_kill</span>(player_id: <span class="tp">str</span>, kills: <span class="tp">int</span>):
+    <span class="fn">salvar_no_banco</span>(player_id, kills)
+
+    <span class="cm"># KDA mudou — cache está desatualizado, remove</span>
+    <span class="kw">if</span> player_id <span class="kw">in</span> _cache:
+        <span class="kw">del</span> _cache[player_id]
+
+<span class="cm"># Para @lru_cache, use .cache_clear():</span>
+<span class="fn">calcular_rank_historico</span>.cache_clear()  <span class="cm"># limpa tudo</span></pre>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Decoradores -->
+<div id="s-deco" class="section c-blue">
+  <div class="sec-hero">
+    <div class="sec-eyebrow"><span class="num">05 /</span> cross-cutting concerns</div>
+    <h2>Decoradores</h2>
+    <p>Adicionar comportamento (log, timing, retry) sem modificar a função original.</p>
+  </div>
+
+  <div class="analogy">
+    <p>Todo caixa de banco precisa verificar identidade antes e registrar a transação depois. Você não modifica cada caixa individualmente — cria um <em>procedimento padrão</em> que envolve qualquer caixa automaticamente. Decorador é esse procedimento padrão aplicado a funções.</p>
+  </div>
+
+  <div class="steps">
+
+    <div class="step-card open">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">01</div>
+        <div class="step-title">Como um decorador funciona por dentro</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="step-desc"><ic>@decorator</ic> é açúcar sintático. Por baixo, é só uma função recebendo outra:</div>
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">como_funciona.py</span></div>
+          <pre><span class="cm"># Escrever isso:</span>
+<span class="dc">@audit_log</span>
+<span class="kw">def</span> <span class="fn">processar_kill</span>(event):
+    ...
+
+<span class="cm"># É exatamente igual a:</span>
+<span class="kw">def</span> <span class="fn">processar_kill</span>(event):
+    ...
+processar_kill = <span class="fn">audit_log</span>(processar_kill)
+<span class="cm"># audit_log recebe a função e retorna uma versão "embalada"</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-card open">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">02</div>
+        <div class="step-title">Construindo o @audit_log do zero</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">audit_log.py</span></div>
+          <pre><span class="kw">import</span> time
+<span class="kw">from</span> functools <span class="kw">import</span> wraps
+
+<span class="kw">def</span> <span class="fn">audit_log</span>(func):            <span class="cm"># 1) recebe a função</span>
+    <span class="dc">@wraps</span>(func)                <span class="cm"># 2) preserva nome e docstring</span>
+    <span class="kw">def</span> <span class="fn">wrapper</span>(*args, **kwargs):  <span class="cm"># 3) aceita qualquer assinatura</span>
+        t0 = <span class="fn">time.perf_counter</span>()
+        <span class="fn">print</span>(<span class="st">f"[AUDIT] Iniciando {func.__name__}"</span>)
+        <span class="kw">try</span>:
+            resultado = <span class="fn">func</span>(*args, **kwargs)  <span class="cm"># chama a original</span>
+            elapsed = <span class="fn">time.perf_counter</span>() - t0
+            <span class="fn">print</span>(<span class="st">f"[AUDIT] OK em {elapsed:.3f}s"</span>)
+            <span class="kw">return</span> resultado
+        <span class="kw">except</span> <span class="fn">Exception</span> <span class="kw">as</span> e:
+            <span class="fn">print</span>(<span class="st">f"[AUDIT] ERRO: {e}"</span>)
+            <span class="kw">raise</span>             <span class="cm"># propaga o erro</span>
+        <span class="kw">finally</span>:
+            <span class="fn">print</span>(<span class="st">f"[AUDIT] Fim de {func.__name__}"</span>)
+    <span class="kw">return</span> wrapper              <span class="cm"># 4) retorna a versão embalada</span>
+
+<span class="cm"># Usando:</span>
+<span class="dc">@audit_log</span>
+<span class="kw">def</span> <span class="fn">processar_kill</span>(event):
+    <span class="cm"># lógica de negócio limpa, sem log aqui</span>
+    <span class="kw">return</span> event.kills * <span class="nm">100</span></pre>
+        </div>
+        <div class="tip"><ic>*args</ic> captura argumentos posicionais, <ic>**kwargs</ic> captura os nomeados. Isso faz o <ic>wrapper</ic> funcionar com qualquer função independente da assinatura.</div>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">03</div>
+        <div class="step-title">Por que @wraps é obrigatório</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="compare">
+          <div class="compare-card bad">
+            <div class="compare-label">sem @wraps</div>
+            <div class="code-wrap"><pre><span class="fn">print</span>(processar_kill.__name__)
+<span class="cm"># "wrapper"  ← errado!</span>
+<span class="fn">print</span>(processar_kill.__doc__)
+<span class="cm"># None ← docstring sumiu!</span></pre></div>
+          </div>
+          <div class="compare-card good">
+            <div class="compare-label">com @wraps(func)</div>
+            <div class="code-wrap"><pre><span class="fn">print</span>(processar_kill.__name__)
+<span class="cm"># "processar_kill" ← correto</span>
+<span class="fn">print</span>(processar_kill.__doc__)
+<span class="cm"># docstring preservada</span></pre></div>
+          </div>
+        </div>
+        <div class="warn">Sem <ic>@wraps</ic>, logs de auditoria mostrariam "wrapper" como nome de todas as funções — inútil para rastrear problemas.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- NumPy -->
+<div id="s-numpy" class="section c-pink">
+  <div class="sec-hero">
+    <div class="sec-eyebrow"><span class="num">06 /</span> análise estatística</div>
+    <h2>NumPy stats</h2>
+    <p>Matemática rápida em listas de números. Faz em uma linha o que levaria um loop inteiro.</p>
+  </div>
+
+  <div class="analogy">
+    <p>Você tem uma planilha com o dano de 10.000 jogadores. Para calcular a média, poderia somar célula por célula (loop Python) ou pressionar "=MÉDIA(A1:A10000)" e ter a resposta instantânea. NumPy é esse "=MÉDIA" — opera em todos os valores de uma vez, rodando em C por baixo.</p>
+  </div>
+
+  <div class="steps">
+
+    <div class="step-card open">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">01</div>
+        <div class="step-title">Por que não usar listas Python normais?</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="compare">
+          <div class="compare-card bad">
+            <div class="compare-label">lista Python — lento</div>
+            <div class="code-wrap"><pre>damages = [<span class="nm">1200</span>, <span class="nm">1840</span>, <span class="nm">900</span>, <span class="nm">2200</span>]
+total = <span class="nm">0</span>
+<span class="kw">for</span> d <span class="kw">in</span> damages:
+    total += d
+media = total / <span class="fn">len</span>(damages)
+<span class="cm"># lento com 1 milhão de valores</span></pre></div>
+          </div>
+          <div class="compare-card good">
+            <div class="compare-label">NumPy — ~100x mais rápido</div>
+            <div class="code-wrap"><pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+damages = np.<span class="fn">array</span>([<span class="nm">1200</span>, <span class="nm">1840</span>, <span class="nm">900</span>, <span class="nm">2200</span>])
+media = np.<span class="fn">mean</span>(damages)
+<span class="cm"># opera em C — veloz com 1M valores</span></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-card open">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">02</div>
+        <div class="step-title">As funções principais no pipeline</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">numpy_stats.py</span></div>
+          <pre>kdas    = np.<span class="fn">array</span>([<span class="nm">1.2</span>, <span class="nm">3.5</span>, <span class="nm">0.8</span>, <span class="nm">5.1</span>, <span class="nm">2.9</span>, <span class="nm">4.4</span>])
+damages = np.<span class="fn">array</span>([<span class="nm">900</span>, <span class="nm">1840</span>, <span class="nm">600</span>, <span class="nm">2200</span>, <span class="nm">1500</span>, <span class="nm">1900</span>])
+
+np.<span class="fn">mean</span>(kdas)           <span class="cm"># 2.98  — média aritmética</span>
+np.<span class="fn">median</span>(kdas)         <span class="cm"># 3.2   — valor do meio (robusto a outliers)</span>
+np.<span class="fn">std</span>(kdas)            <span class="cm"># 1.49  — desvio padrão (consistência)</span>
+np.<span class="fn">min</span>(kdas)            <span class="cm"># 0.8   — pior partida</span>
+np.<span class="fn">max</span>(kdas)            <span class="cm"># 5.1   — melhor partida</span>
+np.<span class="fn">percentile</span>(kdas, <span class="nm">90</span>) <span class="cm"># 4.85  — top 10% começa aqui</span></pre>
+        </div>
+        <div class="tip"><ic>mean</ic> é sensível a outliers (um smurf deturpa a média). <ic>median</ic> é mais robusto — use para representar o desempenho típico.</div>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">03</div>
+        <div class="step-title">Filtros sem loop — boolean indexing</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="step-desc">Filtrar um array com uma condição retorna só os elementos que satisfazem:</div>
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">boolean_index.py</span></div>
+          <pre>kdas = np.<span class="fn">array</span>([<span class="nm">1.2</span>, <span class="nm">3.5</span>, <span class="nm">0.8</span>, <span class="nm">5.1</span>, <span class="nm">2.9</span>])
+
+<span class="cm"># Máscara: array de True/False</span>
+mascara = kdas > <span class="nm">3</span>
+<span class="fn">print</span>(mascara)        <span class="cm"># [False  True False  True False]</span>
+<span class="fn">print</span>(kdas[mascara])  <span class="cm"># [3.5  5.1] — só os True</span>
+
+<span class="cm"># Contar quantos acima da média:</span>
+media = np.<span class="fn">mean</span>(kdas)
+acima = np.<span class="fn">sum</span>(kdas > media)  <span class="cm"># True conta como 1</span>
+<span class="fn">print</span>(<span class="st">f"{acima} jogadores acima da média"</span>)</pre>
+        </div>
+        <div class="tip">A "máscara" é um array de <ic>True/False</ic>. Ao usá-la como índice (<ic>kdas[mascara]</ic>), o NumPy retorna só os elementos onde é <ic>True</ic> — sem nenhum loop.</div>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">04</div>
+        <div class="step-title">np.where e np.argsort — classificar e rankear</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">rank_classify.py</span></div>
+          <pre>kdas = np.<span class="fn">array</span>([<span class="nm">1.2</span>, <span class="nm">3.5</span>, <span class="nm">0.8</span>, <span class="nm">5.1</span>, <span class="nm">2.9</span>])
+
+<span class="cm"># np.where: se/senão vetorizado</span>
+tiers = np.<span class="fn">where</span>(kdas >= <span class="nm">3.0</span>, <span class="st">"Gold"</span>, <span class="st">"Silver"</span>)
+<span class="fn">print</span>(tiers)
+<span class="cm"># ['Silver' 'Gold' 'Silver' 'Gold' 'Silver']</span>
+
+<span class="cm"># np.argsort: índices que ordenariam o array</span>
+ordem = np.<span class="fn">argsort</span>(kdas)[::-<span class="nm">1</span>]  <span class="cm"># [::-1] = decrescente</span>
+<span class="fn">print</span>(<span class="st">"ranking:"</span>, kdas[ordem])
+<span class="cm"># [5.1  3.5  2.9  1.2  0.8] — do melhor ao pior</span></pre>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- ═══════════ NEW SECTIONS ═══════════ -->
+<template id="tpl-cicd">
+<!-- CI/CD -->
+<div id="s-cicd" class="section c-green">
+  <div class="sec-hero">
+    <div class="sec-eyebrow"><span class="num">07 /</span> automação de entrega</div>
+    <h2>CI/CD</h2>
+    <p>O pipeline que leva seu código do editor ao servidor de forma automática e segura.</p>
+  </div>
+  <div class="analogy">
+    <p>CI/CD é como a linha de produção de uma fábrica de carros. Você entrega a peça (código), a esteira verifica qualidade (testes), pinta (build) e entrega pro cliente (deploy) — tudo automático. Sem CI/CD você faria isso tudo na mão, etapa por etapa, com risco de esquecer algo.</p>
+  </div>
+  <div class="steps">
+    <div class="step-card open">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">01</div>
+        <div class="step-title">O que é CI — Integração Contínua</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="step-desc">CI valida o código automaticamente toda vez que você faz <ic>git push</ic>. O objetivo é detectar erros cedo, antes de virar problema grande.</div>
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">sem_ci.txt</span></div>
+          <pre><span class="cm"># Sem CI — processo manual e arriscado:</span>
+você escreve código
+  → lembra de rodar os testes? (às vezes esquece)
+  → faz o build na sua máquina
+  → sobe o arquivo no servidor na mão
+  → torce pra não ter quebrado nada em produção</pre>
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">com_ci.txt</span></div>
+          <pre><span class="cm"># Com CI — automático no git push:</span>
+git push
+  → <span class="fn">CI dispara automaticamente</span>
+  → roda todos os testes
+  → verifica qualidade do código (lint)
+  → faz o build da aplicação
+  → avisa se algo quebrou — antes de ir pra produção</pre>
+        </div>
+        <div class="tip">Se os testes quebrarem, o CI bloqueia o merge. O código com bug nunca chega ao servidor.</div>
+      </div>
+    </div>
+    <div class="step-card open">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">02</div>
+        <div class="step-title">O que é CD — Entrega Contínua</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="step-desc">CD pega o código validado pelo CI e sobe pro servidor automaticamente. Pode ser totalmente automático ou exigir aprovação manual na etapa final.</div>
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">cd_flow.txt</span></div>
+          <pre><span class="cm"># CI passou → CD entra em ação:</span>
+build aprovado
+  → sobe pra <span class="fn">staging</span> (ambiente de testes idêntico ao real)
+  → testes de integração rodam
+  → [aprovação manual opcional]
+  → deploy em <span class="fn">produção</span> (servidor real)
+  → Traefik roteia tráfego pro novo container Docker
+  → versão antiga é desligada graciosamente</pre>
+        </div>
+        <div class="tip">No seu stack com Docker + Traefik, o CD gera a imagem Docker, sobe o novo container e o Traefik já redireciona o tráfego automaticamente — zero downtime.</div>
+      </div>
+    </div>
+    <div class="step-card">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">03</div>
+        <div class="step-title">Exemplo real — GitHub Actions</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="step-desc">Um arquivo <ic>.yml</ic> na pasta <ic>.github/workflows/</ic> define todo o pipeline:</div>
+        <div class="code-wrap">
+          <div class="code-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="code-filename">.github/workflows/pipeline.yml</span></div>
+          <pre><span class="cm"># Dispara no push pra branch main</span>
+<span class="kw">on</span>:
+  push:
+    branches: [main]
+
+<span class="kw">jobs</span>:
+  <span class="fn">ci</span>:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: <span class="st">Instalar dependências</span>
+        run: pip install -r requirements.txt
+
+      - name: <span class="st">Rodar testes</span>
+        run: pytest tests/ -v
+
+      - name: <span class="st">Build da imagem Docker</span>
+        run: docker build -t game-pipeline:<span class="nm">$GITHUB_SHA</span> .
+
+  <span class="fn">cd</span>:
+    needs: ci   <span class="cm"># só roda se CI passou</span>
+    runs-on: ubuntu-latest
+    steps:
+      - name: <span class="st">Deploy no servidor</span>
+        run: |
+          docker push game-pipeline:<span class="nm">$GITHUB_SHA</span>
+          ssh deploy@servidor "docker pull && docker-compose up -d"</pre>
+        </div>
+      </div>
+    </div>
+    <div class="step-card">
+      <div class="step-header" onclick="toggle(this)">
+        <div class="step-num">04</div>
+        <div class="step-title">Ferramentas mais usadas</div>
+        <div class="step-toggle">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="step-desc">Cada ferramenta faz o mesmo trabalho de forma diferente:</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px">
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px">
+            <div style="font-size:12px;font-weight:500;color:var(--green);margin-bottom:6px">GitHub Actions</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.6">Integrado ao GitHub. Gratuito para projetos públicos. O mais popular hoje.</div>
+          </div>
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px">
+            <div style="font-size:12px;font-weight:500;color:var(--green);margin-bottom:6px">GitLab CI</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.6">Embutido no GitLab. Ótimo para self-hosted. Muito usado em empresas.</div>
+          </div>
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px">
+            <div style="font-size:12px;font-weight:500;color:var(--green);margin-bottom:6px">Jenkins</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.6">O mais antigo e flexível. Mais complexo de configurar. Altamente customizável.</div>
+          </div>
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px">
+            <div style="font-size:12px;font-weight:500;color:var(--green);margin-bottom:6px">CircleCI / Drone</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.6">Focados em velocidade. Drone é leve e self-hosted, combina bem com Hetzner.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</template>
+
+<template id="tpl-fluxo">
+<!-- FLUXOGRAMA -->
+<div id="s-fluxo" class="section c-cyan">
+  <div class="sec-hero">
+    <div class="sec-eyebrow">visual · fluxograma</div>
+    <h2>Como ler e montar um fluxograma</h2>
+    <p>Cada forma tem um significado padrão. Aprenda a legenda e você consegue ler qualquer fluxo.</p>
+  </div>
+
+  <div style="margin-bottom:28px">
+    <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:14px">Legenda — formas padrão</div>
+    <div class="legend">
+      <div class="legend-item">
+        <svg width="48" height="32" class="legend-shape"><rect x="2" y="6" width="44" height="20" rx="10" ry="10" fill="none" stroke="#22d3ee" stroke-width="1.5"/><text x="24" y="20" font-size="9" fill="#22d3ee" text-anchor="middle" font-family="JetBrains Mono">início/fim</text></svg>
+        <span><strong style="color:var(--text)">Oval/Cápsula</strong> — início ou fim do fluxo</span>
+      </div>
+      <div class="legend-item">
+        <svg width="48" height="32" class="legend-shape"><rect x="2" y="4" width="44" height="24" rx="4" fill="none" stroke="#818cf8" stroke-width="1.5"/><text x="24" y="20" font-size="9" fill="#818cf8" text-anchor="middle" font-family="JetBrains Mono">processo</text></svg>
+        <span><strong style="color:var(--text)">Retângulo</strong> — processo ou ação executada</span>
+      </div>
+      <div class="legend-item">
+        <svg width="48" height="36" class="legend-shape"><polygon points="24,2 46,18 24,34 2,18" fill="none" stroke="#fbbf24" stroke-width="1.5"/><text x="24" y="22" font-size="8" fill="#fbbf24" text-anchor="middle" font-family="JetBrains Mono">sim/não</text></svg>
+        <span><strong style="color:var(--text)">Losango</strong> — decisão (sim ou não)</span>
+      </div>
+      <div class="legend-item">
+        <svg width="48" height="32" class="legend-shape"><polygon points="2,28 10,4 46,4 38,28" fill="none" stroke="#34d399" stroke-width="1.5"/><text x="24" y="20" font-size="9" fill="#34d399" text-anchor="middle" font-family="JetBrains Mono">dado</text></svg>
+        <span><strong style="color:var(--text)">Paralelogramo</strong> — entrada ou saída de dado</span>
+      </div>
+      <div class="legend-item">
+        <svg width="48" height="32" class="legend-shape"><rect x="2" y="4" width="44" height="24" rx="4" fill="none" stroke="#f472b6" stroke-width="1.5"/><line x1="2" y1="12" x2="46" y2="12" stroke="#f472b6" stroke-width="1"/><text x="24" y="24" font-size="9" fill="#f472b6" text-anchor="middle" font-family="JetBrains Mono">banco</text></svg>
+        <span><strong style="color:var(--text)">Retângulo listrado</strong> — banco de dados ou armazenamento</span>
+      </div>
+      <div class="legend-item">
+        <svg width="48" height="32" class="legend-shape"><line x1="8" y1="16" x2="36" y2="16" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/><defs><marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#64748b"/></marker></defs></svg>
+        <span><strong style="color:var(--text)">Seta</strong> — fluxo / direção da execução</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:14px">Fluxograma do pipeline de dados do jogo</div>
+
+  <div class="fc-wrap">
+    <svg class="fc-svg" viewBox="0 0 760 920" width="760" height="920" xmlns="http://www.w3.org/2000/svg" font-family="JetBrains Mono, monospace">
+      <defs>
+        <marker id="arw" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+          <path d="M1,1 L7,4 L1,7 Z" fill="#334155"/>
+        </marker>
+        <marker id="arw-g" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+          <path d="M1,1 L7,4 L1,7 Z" fill="#34d399"/>
+        </marker>
+        <marker id="arw-r" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+          <path d="M1,1 L7,4 L1,7 Z" fill="#f87171"/>
+        </marker>
+      </defs>
+
+      <!-- INÍCIO -->
+      <rect x="290" y="10" width="180" height="36" rx="18" fill="#021f15" stroke="#34d399" stroke-width="1.5"/>
+      <text x="380" y="33" font-size="11" fill="#34d399" text-anchor="middle">Servidor envia evento</text>
+
+      <!-- seta 1 -->
+      <line x1="380" y1="46" x2="380" y2="78" stroke="#334155" stroke-width="1.5" marker-end="url(#arw)"/>
+
+      <!-- PROCESSO: Receber evento -->
+      <rect x="270" y="80" width="220" height="40" rx="6" fill="#0d1120" stroke="#818cf8" stroke-width="1.5"/>
+      <text x="380" y="96" font-size="10" fill="#818cf8" text-anchor="middle">Receber evento</text>
+      <text x="380" y="111" font-size="9" fill="#534AB7" text-anchor="middle">GameEvent @dataclass</text>
+
+      <!-- seta 2 -->
+      <line x1="380" y1="120" x2="380" y2="152" stroke="#334155" stroke-width="1.5" marker-end="url(#arw)"/>
+
+      <!-- DECISÃO: evento válido? -->
+      <polygon points="380,155 480,195 380,235 280,195" fill="#1a0e02" stroke="#fbbf24" stroke-width="1.5"/>
+      <text x="380" y="191" font-size="10" fill="#fbbf24" text-anchor="middle">Evento válido?</text>
+      <text x="380" y="207" font-size="9" fill="#854F0B" text-anchor="middle">__post_init__</text>
+
+      <!-- seta SIM (verde) -->
+      <line x1="380" y1="235" x2="380" y2="267" stroke="#34d399" stroke-width="1.5" marker-end="url(#arw-g)"/>
+      <text x="390" y="255" font-size="10" fill="#34d399">sim</text>
+
+      <!-- seta NÃO (vermelha) -->
+      <line x1="480" y1="195" x2="600" y2="195" stroke="#f87171" stroke-width="1.5" marker-end="url(#arw-r)"/>
+      <text x="520" y="188" font-size="10" fill="#f87171">não</text>
+
+      <!-- PROCESSO: Rejeitar / Log erro -->
+      <rect x="600" y="175" width="148" height="40" rx="6" fill="#1f0508" stroke="#f87171" stroke-width="1.5"/>
+      <text x="674" y="191" font-size="10" fill="#f87171" text-anchor="middle">Rejeitar evento</text>
+      <text x="674" y="206" font-size="9" fill="#7f1d1d" text-anchor="middle">raise ValueError + log</text>
+
+      <!-- FIM erro -->
+      <rect x="624" y="235" width="100" height="30" rx="15" fill="#1f0508" stroke="#f87171" stroke-width="1.2"/>
+      <text x="674" y="255" font-size="10" fill="#f87171" text-anchor="middle">fim (erro)</text>
+      <line x1="674" y1="215" x2="674" y2="235" stroke="#f87171" stroke-width="1.2" marker-end="url(#arw-r)"/>
+
+      <!-- PROCESSO: Identificar tipo -->
+      <rect x="270" y="268" width="220" height="40" rx="6" fill="#0d1120" stroke="#818cf8" stroke-width="1.5"/>
+      <text x="380" y="284" font-size="10" fill="#818cf8" text-anchor="middle">Identificar tipo de evento</text>
+      <text x="380" y="299" font-size="9" fill="#534AB7" text-anchor="middle">EventType (Enum) + match/case</text>
+
+      <!-- seta -->
+      <line x1="380" y1="308" x2="380" y2="340" stroke="#334155" stroke-width="1.5" marker-end="url(#arw)"/>
+
+      <!-- DECISÃO: tipo? -->
+      <polygon points="380,343 480,383 380,423 280,383" fill="#1a0e02" stroke="#fbbf24" stroke-width="1.5"/>
+      <text x="380" y="387" font-size="10" fill="#fbbf24" text-anchor="middle">Tipo do evento?</text>
+
+      <!-- branches: KILL / DAMAGE / SESSION_END -->
+      <!-- KILL -->
+      <line x1="280" y1="383" x2="120" y2="383" stroke="#334155" stroke-width="1.2" marker-end="url(#arw)"/>
+      <text x="188" y="376" font-size="9" fill="#64748b">KILL</text>
+      <rect x="30" y="363" width="90" height="40" rx="4" fill="#0d1120" stroke="#fb923c" stroke-width="1.2"/>
+      <text x="75" y="379" font-size="9" fill="#fb923c" text-anchor="middle">kills += 1</text>
+      <text x="75" y="393" font-size="9" fill="#7c2d12" text-anchor="middle">assists += 1</text>
+
+      <!-- DAMAGE -->
+      <line x1="480" y1="383" x2="630" y2="383" stroke="#334155" stroke-width="1.2" marker-end="url(#arw)"/>
+      <text x="545" y="376" font-size="9" fill="#64748b">DAMAGE</text>
+      <rect x="630" y="363" width="100" height="40" rx="4" fill="#0d1120" stroke="#fb923c" stroke-width="1.2"/>
+      <text x="680" y="379" font-size="9" fill="#fb923c" text-anchor="middle">damage_total</text>
+      <text x="680" y="393" font-size="9" fill="#7c2d12" text-anchor="middle">+= event.value</text>
+
+      <!-- SESSION_END -->
+      <line x1="380" y1="423" x2="380" y2="450" stroke="#334155" stroke-width="1.2" marker-end="url(#arw)"/>
+      <text x="390" y="441" font-size="9" fill="#64748b">SESSION_END</text>
+      <rect x="300" y="452" width="160" height="30" rx="4" fill="#0d1120" stroke="#fb923c" stroke-width="1.2"/>
+      <text x="380" y="472" font-size="9" fill="#fb923c" text-anchor="middle">fechar_sessao(player)</text>
+
+      <!-- converge -->
+      <line x1="75" y1="403" x2="75" y2="510" stroke="#334155" stroke-width="1" stroke-dasharray="4,3"/>
+      <line x1="680" y1="403" x2="680" y2="510" stroke="#334155" stroke-width="1" stroke-dasharray="4,3"/>
+      <line x1="380" y1="482" x2="380" y2="510" stroke="#334155" stroke-width="1" stroke-dasharray="4,3"/>
+      <line x1="75" y1="510" x2="680" y2="510" stroke="#334155" stroke-width="1"/>
+      <line x1="380" y1="510" x2="380" y2="535" stroke="#334155" stroke-width="1.5" marker-end="url(#arw)"/>
+
+      <!-- PROCESSO: Calcular métricas -->
+      <rect x="265" y="536" width="230" height="40" rx="6" fill="#0d1120" stroke="#818cf8" stroke-width="1.5"/>
+      <text x="380" y="552" font-size="10" fill="#818cf8" text-anchor="middle">Calcular métricas</text>
+      <text x="380" y="567" font-size="9" fill="#534AB7" text-anchor="middle">@property: kda, win_rate, avg_dmg</text>
+
+      <!-- seta -->
+      <line x1="380" y1="576" x2="380" y2="608" stroke="#334155" stroke-width="1.5" marker-end="url(#arw)"/>
+
+      <!-- DECISÃO: cache hit? -->
+      <polygon points="380,611 480,651 380,691 280,651" fill="#1a0e02" stroke="#fbbf24" stroke-width="1.5"/>
+      <text x="380" y="647" font-size="10" fill="#fbbf24" text-anchor="middle">Cache hit?</text>
+      <text x="380" y="663" font-size="9" fill="#854F0B" text-anchor="middle">TTL válido?</text>
+
+      <!-- SIM cache -->
+      <line x1="480" y1="651" x2="590" y2="651" stroke="#34d399" stroke-width="1.5" marker-end="url(#arw-g)"/>
+      <text x="522" y="644" font-size="10" fill="#34d399">sim</text>
+      <rect x="590" y="631" width="120" height="40" rx="6" fill="#021f15" stroke="#34d399" stroke-width="1.5"/>
+      <text x="650" y="647" font-size="10" fill="#34d399" text-anchor="middle">Retorna cache</text>
+      <text x="650" y="662" font-size="9" fill="#065f46" text-anchor="middle">@lru_cache / TTL</text>
+
+      <!-- NÃO cache -->
+      <line x1="380" y1="691" x2="380" y2="720" stroke="#334155" stroke-width="1.5" marker-end="url(#arw)"/>
+      <text x="390" y="710" font-size="10" fill="#64748b">não</text>
+
+      <!-- BANCO -->
+      <rect x="265" y="722" width="230" height="38" rx="4" fill="#03101e" stroke="#60a5fa" stroke-width="1.5"/>
+      <line x1="265" y1="734" x2="495" y2="734" stroke="#60a5fa" stroke-width="1"/>
+      <text x="380" y="730" font-size="9" fill="#60a5fa" text-anchor="middle">▬ banco de dados</text>
+      <text x="380" y="750" font-size="10" fill="#3b82f6" text-anchor="middle">busca histórico do player</text>
+
+      <!-- seta -->
+      <line x1="380" y1="760" x2="380" y2="790" stroke="#334155" stroke-width="1.5" marker-end="url(#arw)"/>
+
+      <!-- DECORADOR AUDIT -->
+      <rect x="265" y="792" width="230" height="40" rx="6" fill="#011820" stroke="#22d3ee" stroke-width="1.5"/>
+      <text x="380" y="808" font-size="10" fill="#22d3ee" text-anchor="middle">@audit_log — registrar</text>
+      <text x="380" y="823" font-size="9" fill="#164e63" text-anchor="middle">quem · quando · duração · erro</text>
+
+      <!-- seta -->
+      <line x1="380" y1="832" x2="380" y2="862" stroke="#334155" stroke-width="1.5" marker-end="url(#arw)"/>
+
+      <!-- NUMPY -->
+      <rect x="265" y="864" width="230" height="40" rx="6" fill="#0d1120" stroke="#f472b6" stroke-width="1.5"/>
+      <text x="380" y="880" font-size="10" fill="#f472b6" text-anchor="middle">NumPy — análise estatística</text>
+      <text x="380" y="895" font-size="9" fill="#701a4f" text-anchor="middle">percentil · ranking · anomalias</text>
+
+      <!-- FIM ok -->
+      <line x1="380" y1="904" x2="380" y2="906" stroke="#334155" stroke-width="1"/>
+    </svg>
+  </div>
+
+  <div style="margin-top:20px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px 18px">
+    <div style="font-size:12px;font-weight:500;color:var(--cyan);margin-bottom:10px">Como montar seu próprio fluxograma — passo a passo</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;gap:10px;align-items:flex-start;font-size:12px;color:var(--muted)"><span style="background:var(--cyan-bg);color:var(--cyan);border-radius:4px;padding:1px 7px;font-weight:600;flex-shrink:0">1</span>Comece e termine sempre com uma <strong style="color:var(--text)">oval</strong>. Todo fluxo tem um ponto de entrada e saída.</div>
+      <div style="display:flex;gap:10px;align-items:flex-start;font-size:12px;color:var(--muted)"><span style="background:var(--cyan-bg);color:var(--cyan);border-radius:4px;padding:1px 7px;font-weight:600;flex-shrink:0">2</span>Use <strong style="color:var(--text)">retângulos</strong> para cada ação: "validar", "calcular", "salvar".</div>
+      <div style="display:flex;gap:10px;align-items:flex-start;font-size:12px;color:var(--muted)"><span style="background:var(--cyan-bg);color:var(--cyan);border-radius:4px;padding:1px 7px;font-weight:600;flex-shrink:0">3</span>Sempre que tiver uma condição (<ic>if</ic>), use um <strong style="color:var(--text)">losango</strong> com duas setas saindo — uma para "sim" e outra para "não".</div>
+      <div style="display:flex;gap:10px;align-items:flex-start;font-size:12px;color:var(--muted)"><span style="background:var(--cyan-bg);color:var(--cyan);border-radius:4px;padding:1px 7px;font-weight:600;flex-shrink:0">4</span>Dados entrando ou saindo do sistema usam <strong style="color:var(--text)">paralelogramo</strong>.</div>
+      <div style="display:flex;gap:10px;align-items:flex-start;font-size:12px;color:var(--muted)"><span style="background:var(--cyan-bg);color:var(--cyan);border-radius:4px;padding:1px 7px;font-weight:600;flex-shrink:0">5</span>Conecte tudo com <strong style="color:var(--text)">setas</strong>. Setas sempre têm direção — nunca sem ponta.</div>
+    </div>
+  </div>
+</div>
+</template>
+
+<template id="tpl-mockup">
+<!-- MOCKUP -->
+<div id="s-mockup" class="section c-orange">
+  <div class="sec-hero">
+    <div class="sec-eyebrow">visual · mockup</div>
+    <h2>Mockup do sistema em ação</h2>
+    <p>Como o pipeline de dados se pareceria numa interface de monitoramento real.</p>
+  </div>
+
+  <!-- TERMINAL de eventos -->
+  <div class="mockup-screen" style="margin-bottom:16px">
+    <div class="mockup-titlebar">
+      <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+      <span style="font-family:var(--font-mono);font-size:11px;color:var(--muted);margin-left:8px">pipeline.log — eventos ao vivo</span>
+      <span style="margin-left:auto;font-size:10px;color:var(--teal);font-family:var(--font-mono)">● ao vivo</span>
+    </div>
+    <div style="padding:14px 16px;font-family:var(--font-mono);font-size:11.5px;line-height:2">
+      <div><span style="color:var(--dim)">[09:42:01]</span> <span style="color:var(--teal)">✓ VÁLIDO</span>  <span style="color:var(--muted)">PLR-00421</span> <span style="color:var(--blue)">KILL</span>  kills=3 dmg=1800 <span style="color:var(--dim)">→ cache miss → calculado</span></div>
+      <div><span style="color:var(--dim)">[09:42:02]</span> <span style="color:var(--teal)">✓ VÁLIDO</span>  <span style="color:var(--muted)">PLR-00789</span> <span style="color:var(--blue)">DAMAGE</span> dmg=2200       <span style="color:var(--dim)">→ cache hit  ← 0.001s</span></div>
+      <div><span style="color:var(--dim)">[09:42:03]</span> <span style="color:var(--amber)">✗ REJEIT</span>  <span style="color:var(--muted)">PLR-00112</span> <span style="color:var(--coral)">KILL</span>  kills=-1       <span style="color:var(--coral)">ValueError: kills negativo</span></div>
+      <div><span style="color:var(--dim)">[09:42:04]</span> <span style="color:var(--teal)">✓ VÁLIDO</span>  <span style="color:var(--muted)">PLR-09999</span> <span style="color:var(--blue)">SESSION_END</span>           <span style="color:var(--dim)">→ métricas finais salvas</span></div>
+      <div><span style="color:var(--dim)">[09:42:05]</span> <span style="color:var(--teal)">✓ VÁLIDO</span>  <span style="color:var(--muted)">PLR-00300</span> <span style="color:var(--blue)">KILL</span>  kills=7 dmg=3100 <span style="color:var(--dim)">→ anomalia detectada</span></div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD de métricas -->
+  <div class="mockup-screen">
+    <div class="mockup-titlebar">
+      <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+      <span style="font-family:var(--font-mono);font-size:11px;color:var(--muted);margin-left:8px">dashboard — métricas da sessão</span>
+    </div>
+    <!-- stat cards row -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border)">
+      <div style="background:var(--bg3);padding:14px 16px">
+        <div style="font-size:10px;color:var(--muted);font-family:var(--font-mono);margin-bottom:4px">eventos/min</div>
+        <div style="font-size:22px;font-weight:700;font-family:var(--font-display);color:var(--cyan)">248</div>
+        <div style="font-size:10px;color:var(--teal)">↑ 12% vs ontem</div>
+      </div>
+      <div style="background:var(--bg3);padding:14px 16px">
+        <div style="font-size:10px;color:var(--muted);font-family:var(--font-mono);margin-bottom:4px">cache hit rate</div>
+        <div style="font-size:22px;font-weight:700;font-family:var(--font-display);color:var(--teal)">87%</div>
+        <div style="font-size:10px;color:var(--teal)">↑ bom desempenho</div>
+      </div>
+      <div style="background:var(--bg3);padding:14px 16px">
+        <div style="font-size:10px;color:var(--muted);font-family:var(--font-mono);margin-bottom:4px">latência média</div>
+        <div style="font-size:22px;font-weight:700;font-family:var(--font-display);color:var(--amber)">3.2ms</div>
+        <div style="font-size:10px;color:var(--amber)">→ dentro do limite</div>
+      </div>
+      <div style="background:var(--bg3);padding:14px 16px">
+        <div style="font-size:10px;color:var(--muted);font-family:var(--font-mono);margin-bottom:4px">erros rejeitados</div>
+        <div style="font-size:22px;font-weight:700;font-family:var(--font-display);color:var(--coral)">14</div>
+        <div style="font-size:10px;color:var(--coral)">↑ 3 anomalias</div>
+      </div>
+    </div>
+    <!-- player table -->
+    <div class="pipeline-mockup">
+      <div class="pm-row header">
+        <div class="pm-cell" style="font-size:10px;color:var(--dim);font-family:var(--font-mono)">JOGADOR</div>
+        <div class="pm-cell" style="font-size:10px;color:var(--dim);font-family:var(--font-mono)">KDA · WIN RATE · DANO MÉD.</div>
+        <div class="pm-cell" style="font-size:10px;color:var(--dim);font-family:var(--font-mono)">STATUS</div>
+      </div>
+      <div class="pm-row">
+        <div class="pm-cell"><span style="font-family:var(--font-mono);font-size:12px;color:var(--text)">PLR-00421</span></div>
+        <div class="pm-cell">
+          <div style="display:flex;gap:16px;align-items:center">
+            <span style="font-family:var(--font-mono);font-size:12px;color:var(--teal)">KDA 5.5</span>
+            <span style="font-family:var(--font-mono);font-size:12px;color:var(--blue)">WR 61%</span>
+            <span style="font-family:var(--font-mono);font-size:12px;color:var(--muted)">DMG 1840</span>
+            <div style="flex:1;max-width:120px"><div class="pm-bar-wrap"><div class="pm-bar" style="width:61%;background:var(--teal)"></div></div></div>
+          </div>
+        </div>
+        <div class="pm-cell"><span class="pm-badge" style="background:rgba(52,211,153,.1);color:var(--teal)">Gold</span></div>
+      </div>
+      <div class="pm-row">
+        <div class="pm-cell"><span style="font-family:var(--font-mono);font-size:12px;color:var(--text)">PLR-09999</span></div>
+        <div class="pm-cell">
+          <div style="display:flex;gap:16px;align-items:center">
+            <span style="font-family:var(--font-mono);font-size:12px;color:var(--amber)">KDA 2.1</span>
+            <span style="font-family:var(--font-mono);font-size:12px;color:var(--blue)">WR 44%</span>
+            <span style="font-family:var(--font-mono);font-size:12px;color:var(--muted)">DMG 900</span>
+            <div style="flex:1;max-width:120px"><div class="pm-bar-wrap"><div class="pm-bar" style="width:44%;background:var(--amber)"></div></div></div>
+          </div>
+        </div>
+        <div class="pm-cell"><span class="pm-badge" style="background:rgba(251,191,36,.1);color:var(--amber)">Silver</span></div>
+      </div>
+      <div class="pm-row">
+        <div class="pm-cell"><span style="font-family:var(--font-mono);font-size:12px;color:var(--text)">PLR-00300</span></div>
+        <div class="pm-cell">
+          <div style="display:flex;gap:16px;align-items:center">
+            <span style="font-family:var(--font-mono);font-size:12px;color:var(--coral)">KDA 9.8</span>
+            <span style="font-family:var(--font-mono);font-size:12px;color:var(--blue)">WR 98%</span>
+            <span style="font-family:var(--font-mono);font-size:12px;color:var(--coral)">DMG 7200</span>
+            <div style="flex:1;max-width:120px"><div class="pm-bar-wrap"><div class="pm-bar" style="width:98%;background:var(--coral)"></div></div></div>
+          </div>
+        </div>
+        <div class="pm-cell"><span class="pm-badge" style="background:rgba(248,113,113,.15);color:var(--coral)">⚠ Anomalia</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tip" style="margin-top:14px">PLR-00300 tem KDA 9.8 e 98% de win rate — np.percentile detecta que está acima do 99º percentil. Sistema sinaliza como possível cheat para revisão manual.</div>
+</div>
+</template>
+
+<template id="tpl-mapa">
+<!-- MAPA MENTAL -->
+<div id="s-mapa" class="section c-rose">
+  <div class="sec-hero">
+    <div class="sec-eyebrow">visual · mapa mental</div>
+    <h2>Mapa mental do pipeline</h2>
+    <p>Todos os conceitos e suas relações num único diagrama.</p>
+  </div>
+  <div class="mmap-wrap">
+    <svg viewBox="0 0 800 680" width="800" height="680" xmlns="http://www.w3.org/2000/svg" font-family="JetBrains Mono, monospace">
+
+      <!-- CENTER -->
+      <rect x="300" y="300" width="200" height="56" rx="10" fill="#1a0512" stroke="#fb7185" stroke-width="2"/>
+      <text x="400" y="323" font-size="13" fill="#fb7185" text-anchor="middle" font-weight="bold">Game Data</text>
+      <text x="400" y="340" font-size="13" fill="#fb7185" text-anchor="middle" font-weight="bold">Pipeline</text>
+
+      <!-- ── BRANCH: ESTRUTURA (esq-cima) ── -->
+      <line x1="300" y1="318" x2="190" y2="220" stroke="#818cf8" stroke-width="1.5"/>
+      <rect x="80" y="196" width="140" height="44" rx="8" fill="#1a1040" stroke="#818cf8" stroke-width="1.5"/>
+      <text x="150" y="214" font-size="10" fill="#818cf8" text-anchor="middle">Estrutura de Dados</text>
+      <text x="150" y="229" font-size="9" fill="#534AB7" text-anchor="middle">@dataclass · TypedDict</text>
+
+      <!-- sub: @dataclass -->
+      <line x1="100" y1="210" x2="52" y2="170" stroke="#534AB7" stroke-width="1"/>
+      <rect x="2" y="152" width="100" height="28" rx="5" fill="#0d0c24" stroke="#534AB7" stroke-width="1"/>
+      <text x="52" y="163" font-size="9" fill="#818cf8" text-anchor="middle">@dataclass</text>
+      <text x="52" y="174" font-size="8" fill="#534AB7" text-anchor="middle">frozen · __post_init__</text>
+
+      <!-- sub: Enum -->
+      <line x1="130" y1="196" x2="110" y2="150" stroke="#534AB7" stroke-width="1"/>
+      <rect x="58" y="132" width="104" height="28" rx="5" fill="#0d0c24" stroke="#534AB7" stroke-width="1"/>
+      <text x="110" y="143" font-size="9" fill="#818cf8" text-anchor="middle">Enum</text>
+      <text x="110" y="154" font-size="8" fill="#534AB7" text-anchor="middle">EventType · match/case</text>
+
+      <!-- ── BRANCH: MÉTRICAS (dir-cima) ── -->
+      <line x1="500" y1="318" x2="610" y2="220" stroke="#34d399" stroke-width="1.5"/>
+      <rect x="580" y="196" width="148" height="44" rx="8" fill="#021f15" stroke="#34d399" stroke-width="1.5"/>
+      <text x="654" y="214" font-size="10" fill="#34d399" text-anchor="middle">Métricas</text>
+      <text x="654" y="229" font-size="9" fill="#065f46" text-anchor="middle">KDA · Win Rate · Dano</text>
+
+      <!-- sub: @property -->
+      <line x1="680" y1="210" x2="720" y2="164" stroke="#065f46" stroke-width="1"/>
+      <rect x="680" y="144" width="110" height="28" rx="5" fill="#0a110a" stroke="#065f46" stroke-width="1"/>
+      <text x="735" y="155" font-size="9" fill="#34d399" text-anchor="middle">@property</text>
+      <text x="735" y="166" font-size="8" fill="#065f46" text-anchor="middle">cálculo lazy</text>
+
+      <!-- sub: defaultdict -->
+      <line x1="640" y1="196" x2="660" y2="150" stroke="#065f46" stroke-width="1"/>
+      <rect x="598" y="130" width="118" height="28" rx="5" fill="#0a110a" stroke="#065f46" stroke-width="1"/>
+      <text x="657" y="141" font-size="9" fill="#34d399" text-anchor="middle">defaultdict(int)</text>
+      <text x="657" y="152" font-size="8" fill="#065f46" text-anchor="middle">acumulador por player</text>
+
+      <!-- ── BRANCH: CACHE (cima-centro) ── -->
+      <line x1="400" y1="300" x2="400" y2="200" stroke="#fbbf24" stroke-width="1.5"/>
+      <rect x="310" y="168" width="180" height="44" rx="8" fill="#1a0e02" stroke="#fbbf24" stroke-width="1.5"/>
+      <text x="400" y="186" font-size="10" fill="#fbbf24" text-anchor="middle">Cache</text>
+      <text x="400" y="201" font-size="9" fill="#854F0B" text-anchor="middle">@lru_cache · TTL · invalidação</text>
+
+      <!-- sub: lru_cache -->
+      <line x1="350" y1="168" x2="310" y2="130" stroke="#854F0B" stroke-width="1"/>
+      <rect x="228" y="108" width="122" height="28" rx="5" fill="#110c02" stroke="#854F0B" stroke-width="1"/>
+      <text x="289" y="119" font-size="9" fill="#fbbf24" text-anchor="middle">@lru_cache(maxsize)</text>
+      <text x="289" y="130" font-size="8" fill="#854F0B" text-anchor="middle">memoização automática</text>
+
+      <!-- sub: TTL -->
+      <line x1="450" y1="168" x2="490" y2="128" stroke="#854F0B" stroke-width="1"/>
+      <rect x="440" y="108" width="110" height="28" rx="5" fill="#110c02" stroke="#854F0B" stroke-width="1"/>
+      <text x="495" y="119" font-size="9" fill="#fbbf24" text-anchor="middle">TTL manual</text>
+      <text x="495" y="130" font-size="8" fill="#854F0B" text-anchor="middle">time.time() + expira</text>
+
+      <!-- ── BRANCH: DECORADORES (esq-baixo) ── -->
+      <line x1="300" y1="340" x2="180" y2="440" stroke="#60a5fa" stroke-width="1.5"/>
+      <rect x="56" y="416" width="168" height="44" rx="8" fill="#03101e" stroke="#60a5fa" stroke-width="1.5"/>
+      <text x="140" y="434" font-size="10" fill="#60a5fa" text-anchor="middle">Decoradores</text>
+      <text x="140" y="449" font-size="9" fill="#185FA5" text-anchor="middle">@audit_log · @retry · timing</text>
+
+      <!-- sub: wraps -->
+      <line x1="80" y1="450" x2="46" y2="494" stroke="#185FA5" stroke-width="1"/>
+      <rect x="2" y="474" width="120" height="28" rx="5" fill="#020d1c" stroke="#185FA5" stroke-width="1"/>
+      <text x="62" y="485" font-size="9" fill="#60a5fa" text-anchor="middle">@wraps(func)</text>
+      <text x="62" y="496" font-size="8" fill="#185FA5" text-anchor="middle">preserva __name__</text>
+
+      <!-- sub: try/finally -->
+      <line x1="140" y1="460" x2="120" y2="504" stroke="#185FA5" stroke-width="1"/>
+      <rect x="48" y="486" width="140" height="28" rx="5" fill="#020d1c" stroke="#185FA5" stroke-width="1"/>
+      <text x="118" y="497" font-size="9" fill="#60a5fa" text-anchor="middle">try / finally</text>
+      <text x="118" y="508" font-size="8" fill="#185FA5" text-anchor="middle">log sempre executa</text>
+
+      <!-- ── BRANCH: NUMPY (dir-baixo) ── -->
+      <line x1="500" y1="340" x2="618" y2="440" stroke="#f472b6" stroke-width="1.5"/>
+      <rect x="576" y="416" width="182" height="44" rx="8" fill="#1a0512" stroke="#f472b6" stroke-width="1.5"/>
+      <text x="667" y="434" font-size="10" fill="#f472b6" text-anchor="middle">NumPy</text>
+      <text x="667" y="449" font-size="9" fill="#701a4f" text-anchor="middle">mean · std · percentile · where</text>
+
+      <!-- sub: boolean index -->
+      <line x1="700" y1="460" x2="724" y2="502" stroke="#701a4f" stroke-width="1"/>
+      <rect x="650" y="484" width="140" height="28" rx="5" fill="#120410" stroke="#701a4f" stroke-width="1"/>
+      <text x="720" y="495" font-size="9" fill="#f472b6" text-anchor="middle">boolean indexing</text>
+      <text x="720" y="506" font-size="8" fill="#701a4f" text-anchor="middle">filtro sem loop</text>
+
+      <!-- sub: argsort -->
+      <line x1="630" y1="460" x2="610" y2="504" stroke="#701a4f" stroke-width="1"/>
+      <rect x="536" y="484" width="130" height="28" rx="5" fill="#120410" stroke="#701a4f" stroke-width="1"/>
+      <text x="601" y="495" font-size="9" fill="#f472b6" text-anchor="middle">np.argsort()</text>
+      <text x="601" y="506" font-size="8" fill="#701a4f" text-anchor="middle">ranking de jogadores</text>
+
+      <!-- ── BRANCH: CI/CD (baixo-centro) ── -->
+      <line x1="400" y1="356" x2="400" y2="456" stroke="#4ade80" stroke-width="1.5"/>
+      <rect x="294" y="458" width="212" height="44" rx="8" fill="#021a08" stroke="#4ade80" stroke-width="1.5"/>
+      <text x="400" y="476" font-size="10" fill="#4ade80" text-anchor="middle">CI/CD</text>
+      <text x="400" y="491" font-size="9" fill="#15803d" text-anchor="middle">push → test → build → deploy</text>
+
+      <!-- sub: GitHub Actions -->
+      <line x1="340" y1="502" x2="310" y2="542" stroke="#15803d" stroke-width="1"/>
+      <rect x="218" y="524" width="142" height="28" rx="5" fill="#011405" stroke="#15803d" stroke-width="1"/>
+      <text x="289" y="535" font-size="9" fill="#4ade80" text-anchor="middle">GitHub Actions</text>
+      <text x="289" y="546" font-size="8" fill="#15803d" text-anchor="middle">workflow .yml</text>
+
+      <!-- sub: Docker -->
+      <line x1="460" y1="502" x2="490" y2="542" stroke="#15803d" stroke-width="1"/>
+      <rect x="438" y="524" width="116" height="28" rx="5" fill="#011405" stroke="#15803d" stroke-width="1"/>
+      <text x="496" y="535" font-size="9" fill="#4ade80" text-anchor="middle">Docker + Traefik</text>
+      <text x="496" y="546" font-size="8" fill="#15803d" text-anchor="middle">imagem → deploy</text>
+
+      <!-- ── BRANCH: VALIDAÇÃO (cima-esq diagonal) ── -->
+      <line x1="310" y1="306" x2="206" y2="332" stroke="#fb923c" stroke-width="1.5"/>
+      <rect x="60" y="318" width="172" height="44" rx="8" fill="#1f0d05" stroke="#fb923c" stroke-width="1.5"/>
+      <text x="146" y="336" font-size="10" fill="#fb923c" text-anchor="middle">Validação</text>
+      <text x="146" y="351" font-size="9" fill="#7c2d12" text-anchor="middle">Enum · isinstance · raise</text>
+
+      <!-- sub -->
+      <line x1="80" y1="340" x2="44" y2="370" stroke="#7c2d12" stroke-width="1"/>
+      <rect x="2" y="352" width="112" height="28" rx="5" fill="#110600" stroke="#7c2d12" stroke-width="1"/>
+      <text x="58" y="363" font-size="9" fill="#fb923c" text-anchor="middle">raise ValueError</text>
+      <text x="58" y="374" font-size="8" fill="#7c2d12" text-anchor="middle">rejeita imediato</text>
+
+    </svg>
+  </div>
+</div>
+</template>
+
+
+<script>
+const navMap = {
+  dc:'c-purple', enum:'c-teal', prop:'c-coral', cache:'c-amber',
+  deco:'c-blue', numpy:'c-pink', cicd:'c-green',
+  fluxo:'c-cyan', mockup:'c-orange', mapa:'c-rose'
+};
+
+const templates = { cicd:'tpl-cicd', fluxo:'tpl-fluxo', mockup:'tpl-mockup', mapa:'tpl-mapa' };
+
+function go(id) {
+  if (templates[id] && !document.getElementById('s-' + id)) {
+    const tpl = document.getElementById(templates[id]);
+    const main = document.querySelector('main.main');
+    const div = tpl.content.firstElementChild.cloneNode(true);
+    main.appendChild(div);
+  }
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('s-' + id).classList.add('active');
+  const cls = navMap[id];
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.classList.contains(cls)) n.classList.add('active');
+  });
+}
+
+function toggle(header) {
+  header.parentElement.classList.toggle('open');
+}
+</script>
+</body>
+</html>

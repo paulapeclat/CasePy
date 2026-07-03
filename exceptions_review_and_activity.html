@@ -1,0 +1,802 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); }
+
+.screen { display: none; padding: 1.5rem 0; }
+.screen.active { display: block; }
+
+.section-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-tertiary);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+.section-title {
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin-bottom: 0.4rem;
+}
+.section-sub {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+}
+
+.progress-bar {
+  height: 4px;
+  background: var(--color-border-tertiary);
+  border-radius: 2px;
+  margin-bottom: 1.5rem;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--color-text-secondary);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+  margin-bottom: 1.5rem;
+}
+
+.error-card {
+  background: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  padding: 1rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  user-select: none;
+}
+.error-card:hover {
+  border-color: var(--color-border-primary);
+  background: var(--color-background-secondary);
+}
+.error-card.selected {
+  border: 1.5px solid var(--color-border-info);
+  background: var(--color-background-info);
+}
+.error-card.correct {
+  border: 1.5px solid var(--color-border-success);
+  background: var(--color-background-success);
+}
+.error-card.wrong {
+  border: 1.5px solid var(--color-border-danger);
+  background: var(--color-background-danger);
+}
+.error-card .card-icon {
+  font-size: 20px;
+  margin-bottom: 8px;
+  color: var(--color-text-secondary);
+}
+.error-card.selected .card-icon { color: var(--color-text-info); }
+.error-card.correct .card-icon { color: var(--color-text-success); }
+.error-card.wrong .card-icon { color: var(--color-text-danger); }
+
+.error-card .card-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin-bottom: 4px;
+  line-height: 1.3;
+}
+.error-card .card-desc {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+.error-card.selected .card-title,
+.error-card.selected .card-desc { color: var(--color-text-info); }
+.error-card.correct .card-title,
+.error-card.correct .card-desc { color: var(--color-text-success); }
+.error-card.wrong .card-title,
+.error-card.wrong .card-desc { color: var(--color-text-danger); }
+
+.question-box {
+  background: var(--color-background-secondary);
+  border-radius: var(--border-radius-lg);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+}
+.question-counter {
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+  margin-bottom: 6px;
+}
+.question-text {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  line-height: 1.5;
+  margin-bottom: 0.75rem;
+}
+.code-block {
+  background: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-md);
+  padding: 0.75rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-primary);
+  line-height: 1.6;
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 1rem;
+}
+.option-btn {
+  background: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-secondary);
+  border-radius: var(--border-radius-md);
+  padding: 0.65rem 1rem;
+  font-size: 14px;
+  color: var(--color-text-primary);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+  width: 100%;
+  font-family: var(--font-sans);
+}
+.option-btn:hover { background: var(--color-background-secondary); }
+.option-btn.correct {
+  background: var(--color-background-success);
+  border-color: var(--color-border-success);
+  color: var(--color-text-success);
+}
+.option-btn.wrong {
+  background: var(--color-background-danger);
+  border-color: var(--color-border-danger);
+  color: var(--color-text-danger);
+}
+.option-btn:disabled { cursor: default; }
+
+.feedback-box {
+  border-radius: var(--border-radius-md);
+  padding: 0.75rem 1rem;
+  font-size: 13px;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+  display: none;
+}
+.feedback-box.visible { display: block; }
+.feedback-box.success {
+  background: var(--color-background-success);
+  color: var(--color-text-success);
+}
+.feedback-box.danger {
+  background: var(--color-background-danger);
+  color: var(--color-text-danger);
+}
+
+.btn-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+.btn-primary {
+  background: var(--color-text-primary);
+  color: var(--color-background-primary);
+  border: none;
+  border-radius: var(--border-radius-md);
+  padding: 0.6rem 1.25rem;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition: opacity 0.15s;
+}
+.btn-primary:hover { opacity: 0.85; }
+.btn-primary:disabled { opacity: 0.35; cursor: default; }
+.btn-secondary {
+  background: transparent;
+  color: var(--color-text-primary);
+  border: 0.5px solid var(--color-border-secondary);
+  border-radius: var(--border-radius-md);
+  padding: 0.6rem 1.25rem;
+  font-size: 14px;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition: background 0.12s;
+}
+.btn-secondary:hover { background: var(--color-background-secondary); }
+
+.score-display {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+.score-card {
+  flex: 1;
+  min-width: 100px;
+  background: var(--color-background-secondary);
+  border-radius: var(--border-radius-md);
+  padding: 0.75rem 1rem;
+  text-align: center;
+}
+.score-card .s-label {
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+  margin-bottom: 4px;
+}
+.score-card .s-value {
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+.score-card.success .s-value { color: var(--color-text-success); }
+.score-card.danger .s-value { color: var(--color-text-danger); }
+
+.review-item {
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  padding: 1rem 1.25rem;
+  margin-bottom: 10px;
+  background: var(--color-background-primary);
+}
+.review-item .ri-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.ri-icon { font-size: 16px; margin-top: 2px; flex-shrink: 0; }
+.ri-icon.ok { color: var(--color-text-success); }
+.ri-icon.fail { color: var(--color-text-danger); }
+.ri-q { font-size: 13px; font-weight: 500; color: var(--color-text-primary); line-height: 1.4; }
+.ri-answer {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  padding-left: 26px;
+  line-height: 1.5;
+}
+
+.nav-dots {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 1.25rem;
+}
+.nav-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--color-border-secondary);
+  transition: background 0.2s;
+}
+.nav-dot.done { background: var(--color-text-success); }
+.nav-dot.current { background: var(--color-text-primary); }
+.nav-dot.wrong-dot { background: var(--color-text-danger); }
+
+.divider {
+  height: 0.5px;
+  background: var(--color-border-tertiary);
+  margin: 1.25rem 0;
+}
+</style>
+
+<h2 class="sr-only">Atividade interativa: 10 erros mais comuns no tratamento de exceptions em Python</h2>
+
+<div id="screen-intro" class="screen active">
+  <div class="section-label">Atividade interativa</div>
+  <div class="section-title">10 erros mais comuns em exceptions</div>
+  <div class="section-sub">Antes do quiz, conheça os erros que todo desenvolvedor comete. Clique em cada card para entender o problema.</div>
+
+  <div class="cards-grid" id="cards-container"></div>
+
+  <div id="card-detail" style="display:none; background:var(--color-background-secondary); border-radius:var(--border-radius-lg); padding:1rem 1.25rem; margin-bottom:1.25rem;">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+      <div style="font-size:14px; font-weight:500; color:var(--color-text-primary);" id="detail-title"></div>
+      <button onclick="closeDetail()" style="background:none;border:none;cursor:pointer;color:var(--color-text-tertiary);font-size:16px;"><i class="ti ti-x"></i></button>
+    </div>
+    <div style="font-size:13px; color:var(--color-text-secondary); margin-bottom:10px; line-height:1.5;" id="detail-problem"></div>
+    <div class="code-block" id="detail-bad" style="margin-bottom:8px; border-left:2px solid var(--color-border-danger);"></div>
+    <div style="font-size:11px; color:var(--color-text-danger); margin-bottom:10px;">Problema</div>
+    <div class="code-block" id="detail-good" style="border-left:2px solid var(--color-border-success);"></div>
+    <div style="font-size:11px; color:var(--color-text-success); margin-top:6px;" id="detail-fix"></div>
+  </div>
+
+  <div id="cards-seen-counter" style="font-size:13px; color:var(--color-text-secondary); margin-bottom:1rem;"></div>
+  <div class="btn-row">
+    <button class="btn-primary" id="btn-start-quiz" onclick="startQuiz()" disabled>Iniciar quiz <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+    <button class="btn-secondary" onclick="revealAll()">Ver todos os cards</button>
+  </div>
+</div>
+
+<div id="screen-quiz" class="screen">
+  <div class="section-label">Quiz</div>
+  <div class="section-title">Identifique o erro</div>
+  <div class="section-sub">Para cada trecho de código, escolha qual dos 10 erros está sendo cometido.</div>
+
+  <div class="nav-dots" id="nav-dots"></div>
+  <div class="progress-bar"><div class="progress-fill" id="quiz-progress"></div></div>
+
+  <div class="question-box">
+    <div class="question-counter" id="q-counter"></div>
+    <div class="question-text" id="q-text"></div>
+    <div class="code-block" id="q-code"></div>
+  </div>
+
+  <div class="options-list" id="options-container"></div>
+  <div class="feedback-box" id="feedback-box"></div>
+
+  <div class="btn-row">
+    <button class="btn-primary" id="btn-next" onclick="nextQuestion()" disabled>Próxima <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+  </div>
+</div>
+
+<div id="screen-result" class="screen">
+  <div class="section-label">Resultado</div>
+  <div class="section-title" id="result-title"></div>
+  <div class="section-sub" id="result-sub"></div>
+
+  <div class="score-display">
+    <div class="score-card success">
+      <div class="s-label">Acertos</div>
+      <div class="s-value" id="res-correct">0</div>
+    </div>
+    <div class="score-card danger">
+      <div class="s-label">Erros</div>
+      <div class="s-value" id="res-wrong">0</div>
+    </div>
+    <div class="score-card">
+      <div class="s-label">Aproveitamento</div>
+      <div class="s-value" id="res-pct">0%</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div style="font-size:14px; font-weight:500; color:var(--color-text-primary); margin-bottom:1rem;">Revisão por questão</div>
+  <div id="review-list"></div>
+
+  <div class="btn-row" style="margin-top:1.5rem;">
+    <button class="btn-primary" onclick="sendPrompt('Quero ver a revisão completa de exceptions com exemplos de código correto para os erros que errei no quiz')">Ver revisão completa ↗</button>
+    <button class="btn-secondary" onclick="resetAll()">Refazer</button>
+  </div>
+</div>
+
+<script>
+const errors = [
+  {
+    id: 0,
+    title: "except genérico",
+    icon: "ti-circle-x",
+    desc: "Capturar tudo sem especificar o tipo",
+    problem: "Usar 'except:' ou 'except Exception:' esconde bugs reais. Um TypeError acidental vira silêncio.",
+    bad: `try:\n    resultado = 10 / valor\nexcept:\n    print("deu erro")`,
+    good: `try:\n    resultado = 10 / valor\nexcept ZeroDivisionError:\n    print("divisão por zero")`,
+    fix: "Sempre capture o tipo específico do erro esperado."
+  },
+  {
+    id: 1,
+    title: "engolir a exceção",
+    icon: "ti-ghost",
+    desc: "Capturar e não fazer nada (pass ou print vazio)",
+    problem: "Um 'except: pass' silencia o erro completamente. O programa parece funcionar mas está quebrado por dentro.",
+    bad: `try:\n    conectar_banco()\nexcept Exception:\n    pass`,
+    good: `try:\n    conectar_banco()\nexcept ConnectionError as e:\n    logger.error(f"Falha de conexão: {e}")\n    raise`,
+    fix: "Sempre logue ou trate o erro. Nunca apenas silencie."
+  },
+  {
+    id: 2,
+    title: "não usar 'as e'",
+    icon: "ti-unlink",
+    desc: "Capturar sem acessar a mensagem do erro",
+    problem: "Sem 'as e', você sabe que o erro ocorreu mas não sabe o motivo — impossível de debugar.",
+    bad: `try:\n    processar(dados)\nexcept ValueError:\n    print("erro de valor")`,
+    good: `try:\n    processar(dados)\nexcept ValueError as e:\n    print(f"Erro de valor: {e}")`,
+    fix: "Use 'as e' para capturar a mensagem e inclua no log."
+  },
+  {
+    id: 3,
+    title: "try muito amplo",
+    icon: "ti-arrows-maximize",
+    desc: "Colocar dezenas de linhas dentro do try",
+    problem: "Um try gigante captura erros de qualquer parte do bloco. Fica impossível saber de onde veio o problema.",
+    bad: `try:\n    dados = ler_arquivo()\n    dados = limpar(dados)\n    resultado = calcular(dados)\n    salvar(resultado)\n    notificar()\nexcept Exception as e:\n    print(e)`,
+    good: `dados = ler_arquivo()\ndados = limpar(dados)\ntry:\n    resultado = calcular(dados)\nexcept ValueError as e:\n    print(f"Cálculo inválido: {e}")`,
+    fix: "O try deve envolver só a linha que pode falhar."
+  },
+  {
+    id: 4,
+    title: "ordem errada de excepts",
+    icon: "ti-sort-descending",
+    desc: "Colocar Exception antes das específicas",
+    problem: "Python executa o primeiro except que bater. Se Exception vier antes, os específicos nunca executam.",
+    bad: `try:\n    operacao()\nexcept Exception as e:\n    print("erro geral")\nexcept ValueError:\n    print("valor inválido")  # nunca chega aqui!`,
+    good: `try:\n    operacao()\nexcept ValueError:\n    print("valor inválido")\nexcept Exception as e:\n    print(f"erro inesperado: {e}")`,
+    fix: "Sempre do mais específico para o mais genérico."
+  },
+  {
+    id: 5,
+    title: "raise sem argumento",
+    icon: "ti-rotate",
+    desc: "Re-levantar o erro errado ou sem contexto",
+    problem: "Usar 'raise e' dentro do except perde o traceback original. A linha real do erro some.",
+    bad: `try:\n    operacao()\nexcept ValueError as e:\n    log(e)\n    raise e   # perde o traceback original`,
+    good: `try:\n    operacao()\nexcept ValueError as e:\n    log(e)\n    raise     # re-levanta com traceback completo`,
+    fix: "Use 'raise' sem argumento para preservar o stack trace."
+  },
+  {
+    id: 6,
+    title: "lógica no finally",
+    icon: "ti-clock-pause",
+    desc: "Colocar código de negócio no bloco finally",
+    problem: "Finally é para limpeza (fechar conexão, liberar arquivo). Colocar lógica ali faz ela rodar mesmo em erro — resultados imprevisíveis.",
+    bad: `try:\n    resultado = calcular()\nfinally:\n    salvar(resultado)  # 'resultado' pode não existir!`,
+    good: `try:\n    resultado = calcular()\n    salvar(resultado)\nfinally:\n    conexao.close()   # só limpeza aqui`,
+    fix: "Finally é só para liberar recursos. Nunca para lógica."
+  },
+  {
+    id: 7,
+    title: "exception sem herança",
+    icon: "ti-hierarchy",
+    desc: "Criar exceptions sem herdar de Exception",
+    problem: "Uma classe que não herda de Exception não pode ser capturada com except. Gera TypeError na hora do raise.",
+    bad: `class ErroDeNegocio:   # não herda nada!\n    pass\n\nraise ErroDeNegocio("ops")  # TypeError!`,
+    good: `class ErroDeNegocio(Exception):\n    pass\n\nraise ErroDeNegocio("saldo insuficiente")`,
+    fix: "Toda exception customizada deve herdar de Exception."
+  },
+  {
+    id: 8,
+    title: "controle de fluxo com exceptions",
+    icon: "ti-git-branch",
+    desc: "Usar exceptions como if/else normal",
+    problem: "Exceptions são para erros inesperados, não para controle de fluxo esperado. Torna o código lento e difícil de ler.",
+    bad: `try:\n    valor = dicionario[chave]\nexcept KeyError:\n    valor = None    # isso é um if disfarçado`,
+    good: `valor = dicionario.get(chave, None)\n# ou\nif chave in dicionario:\n    valor = dicionario[chave]`,
+    fix: "Para fluxo esperado, use if/else ou .get(). Exception é para o inesperado."
+  },
+  {
+    id: 9,
+    title: "não documentar exceptions",
+    icon: "ti-file-off",
+    desc: "Funções que levantam erros sem avisar no docstring",
+    problem: "Quem chama sua função não sabe que ela pode explodir. O except do chamador não trata o erro certo.",
+    bad: `def sacar(saldo, valor):\n    if valor > saldo:\n        raise ValueError("saldo insuf.")  # ninguém sabe disso!`,
+    good: `def sacar(saldo, valor):\n    """\n    Raises:\n        ValueError: se valor > saldo\n        TypeError: se valor não for numérico\n    """\n    if valor > saldo:\n        raise ValueError("saldo insuficiente")`,
+    fix: "Documente todas as exceptions que sua função pode lançar."
+  }
+];
+
+const quizQuestions = [
+  {
+    text: "O sistema de compras da In-Game Store tem o seguinte tratamento de erro. O que está errado?",
+    code: `def comprar_item(player_id, item_id, saldo):\n    try:\n        validar(player_id)\n        buscar_item(item_id)\n        debitar(saldo)\n        registrar_log()\n        enviar_email()\n        atualizar_inventario()\n    except Exception:\n        pass`,
+    correctIds: [1, 3],
+    correctAnswer: 1,
+    options: [
+      { id: 1, text: "Engolindo a exceção com pass — qualquer erro silencia e o jogador nunca sabe o que aconteceu" },
+      { id: 3, text: "Try muito amplo — 6 operações dentro de um único try" },
+      { id: 0, text: "Except genérico — deveria especificar o tipo de erro" },
+      { id: 7, text: "Exception sem herança — a classe não herdou corretamente" },
+    ],
+    explanation: "Dois problemas: o except silencia tudo com 'pass' (engolir exceção) e o try cobre 6 operações distintas (muito amplo). Mesmo que o erro correto aqui seja o 'engolir', o try amplo dificulta muito o diagnóstico."
+  },
+  {
+    text: "Um desenvolvedor criou uma exceção personalizada para o sistema de ban. O que está errado?",
+    code: `class JogadorBanidoError:\n    def __init__(self, msg):\n        self.msg = msg\n\ndef verificar_ban(player_id):\n    if player_id in banidos:\n        raise JogadorBanidoError("banido")`,
+    correctAnswer: 7,
+    options: [
+      { id: 7, text: "Exception sem herança — JogadorBanidoError não herda de Exception" },
+      { id: 2, text: "Não usa 'as e' — a mensagem do erro não é acessível" },
+      { id: 5, text: "Raise sem argumento — deveria usar raise sem parâmetros" },
+      { id: 9, text: "Não documentou as exceptions no docstring da função" },
+    ],
+    explanation: "JogadorBanidoError não herda de Exception. Python não consegue capturá-la com 'except JogadorBanidoError' — vai lançar um TypeError. A correção é: 'class JogadorBanidoError(Exception): pass'."
+  },
+  {
+    text: "O sistema de matchmaking precisa fechar a conexão com o banco após cada operação. O que está errado neste código?",
+    code: `def buscar_partida(player_id):\n    conn = conectar_banco()\n    try:\n        partida = conn.query(player_id)\n        return partida\n    finally:\n        resultado = calcular_mmr(partida)\n        salvar_mmr(player_id, resultado)\n        conn.close()`,
+    correctAnswer: 6,
+    options: [
+      { id: 6, text: "Lógica de negócio no finally — calcular_mmr e salvar_mmr não deveriam estar ali" },
+      { id: 3, text: "Try muito amplo — o bloco deveria cobrir menos código" },
+      { id: 1, text: "Engolindo exceção — o erro está sendo ignorado" },
+      { id: 4, text: "Ordem errada de excepts — os handlers estão na ordem incorreta" },
+    ],
+    explanation: "O finally deve conter APENAS conn.close(). O calcular_mmr e salvar_mmr são lógica de negócio — se conn.query() falhar, 'partida' não existe e o finally vai explodir com NameError ao tentar acessá-la."
+  },
+  {
+    text: "Ao revisar o código do sistema de ranking, você encontra o seguinte. Qual é o problema?",
+    code: `def atualizar_mmr(player_id, delta):\n    try:\n        novo_mmr = buscar_mmr(player_id) + delta\n        salvar_mmr(player_id, novo_mmr)\n    except Exception as e:\n        print("erro geral")\n    except ValueError:\n        print("delta inválido")\n    except DatabaseError:\n        print("falha no banco")`,
+    correctAnswer: 4,
+    options: [
+      { id: 4, text: "Ordem errada de excepts — Exception está antes dos específicos" },
+      { id: 2, text: "Não usa 'as e' corretamente — a variável e não está sendo logada" },
+      { id: 0, text: "Except genérico — Exception não deveria estar aqui de forma alguma" },
+      { id: 9, text: "Sem documentação — o docstring não lista as exceptions possíveis" },
+    ],
+    explanation: "Exception é a classe base de todos os erros. Colocá-la primeiro faz com que ValueError e DatabaseError NUNCA sejam alcançados — qualquer erro bate em 'except Exception' e para ali. Sempre coloque os específicos antes do genérico."
+  },
+  {
+    text: "O sistema de cache tenta buscar um perfil. O que está errado?",
+    code: `def buscar_perfil(player_id):\n    try:\n        return cache[player_id]\n    except KeyError:\n        perfil = banco.get(player_id)\n        cache[player_id] = perfil\n        return perfil`,
+    correctAnswer: 8,
+    options: [
+      { id: 8, text: "Controle de fluxo com exceptions — KeyError aqui é esperado, não um erro real" },
+      { id: 1, text: "Engolindo exceção — o erro está sendo silenciado" },
+      { id: 5, text: "Raise sem argumento — deveria re-lançar o KeyError" },
+      { id: 3, text: "Try muito amplo — o bloco try cobre operações demais" },
+    ],
+    explanation: "Um cache miss (chave não encontrada) é o comportamento ESPERADO, não um erro. O correto é usar cache.get(player_id) ou 'if player_id in cache'. Usar exceptions para controle de fluxo normal torna o código confuso e é mais lento."
+  },
+  {
+    text: "Ao testar o sistema de transferência de coins, você nota que os logs não têm informação suficiente para debugar. O que está errado?",
+    code: `try:\n    executar_transferencia(origem, destino, valor)\nexcept ValueError:\n    print("valor inválido")\nexcept SaldoInsuficienteError:\n    print("saldo insuficiente")`,
+    correctAnswer: 2,
+    options: [
+      { id: 2, text: "Não usa 'as e' — o log não mostra qual foi o valor inválido ou qual o saldo" },
+      { id: 9, text: "Sem documentação — a função não documenta suas exceptions" },
+      { id: 0, text: "Except genérico — deveria capturar Exception também" },
+      { id: 6, text: "Lógica no finally — falta um bloco finally para limpar recursos" },
+    ],
+    explanation: "Sem 'as e', sabe-se que ocorreu um ValueError mas não qual valor causou o problema. Com 'except ValueError as e: print(f\"valor inválido: {e}\")' o log fica útil para debugging."
+  },
+  {
+    text: "Um colega escreveu a função de validação de partida abaixo. Qual o problema mais grave?",
+    code: `def validar_partida(match_data):\n    try:\n        checar_jogadores(match_data)\n        checar_mapa(match_data)\n        checar_modo(match_data)\n        checar_duracao(match_data)\n        checar_resultado(match_data)\n    except Exception as e:\n        print(f"erro: {e}")`,
+    correctAnswer: 3,
+    options: [
+      { id: 3, text: "Try muito amplo — 5 checagens em um único try, impossível saber qual falhou" },
+      { id: 0, text: "Except genérico — Exception captura tudo ao invés de erros específicos" },
+      { id: 4, text: "Ordem de excepts — os handlers específicos deveriam vir antes" },
+      { id: 7, text: "Exception sem herança — as classes de erro não herdam corretamente" },
+    ],
+    explanation: "O problema principal é o try amplo: se checar_mapa() falhar, o except captura o erro mas você não sabe se foi o mapa, o modo ou a duração. Cada operação deveria ter seu próprio tratamento. O except genérico é secundário."
+  },
+  {
+    text: "Ao depurar um crash no servidor de jogo, você encontra este trecho no código de reconexão. O que está errado?",
+    code: `try:\n    reconectar(player_id)\nexcept ConnectionError as e:\n    logger.warning(e)\n    raise e   # re-levanta para o chamador tratar`,
+    correctAnswer: 5,
+    options: [
+      { id: 5, text: "Raise com argumento 'e' — perde o traceback original, dificultando o debug" },
+      { id: 1, text: "Engolindo exceção — o erro está sendo silenciado antes de ser relançado" },
+      { id: 2, text: "Não usa 'as e' corretamente — a variável não está sendo logada" },
+      { id: 9, text: "Sem documentação — a função não declara que pode lançar ConnectionError" },
+    ],
+    explanation: "'raise e' cria uma nova exceção perdendo o contexto original — o traceback aponta para esta linha e não para onde o erro realmente ocorreu. Use simplesmente 'raise' (sem argumento) para re-lançar preservando todo o stack trace."
+  },
+  {
+    text: "A equipe está reclamando que não sabe como tratar erros ao chamar a função do sistema de loja. Por que?",
+    code: `def processar_pagamento(player_id, valor, metodo):\n    debitar_wallet(player_id, valor)\n    registrar_transacao(player_id, valor, metodo)\n    notificar_jogador(player_id)\n\nprocessar_pagamento("PLR-001", 500, "GameCoins")`,
+    correctAnswer: 9,
+    options: [
+      { id: 9, text: "Sem documentação de exceptions — quem chama não sabe quais erros podem ocorrer" },
+      { id: 1, text: "Engolindo exceção — os erros internos estão sendo ignorados" },
+      { id: 8, text: "Controle de fluxo com exceptions — o fluxo normal usa exceptions desnecessariamente" },
+      { id: 6, text: "Lógica no finally — falta um bloco finally para registrar o resultado" },
+    ],
+    explanation: "A função pode lançar SaldoInsuficienteError, DatabaseError, NotificationError... mas quem chama não tem como saber. O docstring deve listar todos os 'Raises:'. Sem isso, o chamador ou ignora os erros ou usa 'except Exception' — o que nos leva de volta ao erro 1."
+  },
+  {
+    text: "Último desafio. Este código tem dois problemas diferentes. Identifique o principal.",
+    code: `try:\n    resultado = calcular_kda(kills, deaths, assists)\nexcept:\n    resultado = 0.0\n    continuar_processamento()`,
+    correctAnswer: 0,
+    options: [
+      { id: 0, text: "Except genérico sem tipo — captura qualquer erro incluindo bugs de código" },
+      { id: 8, text: "Controle de fluxo — o except está sendo usado como um else" },
+      { id: 3, text: "Try muito amplo — o bloco cobre mais de uma operação" },
+      { id: 1, text: "Engolindo exceção — o erro não está sendo logado em lugar nenhum" },
+    ],
+    explanation: "Um 'except:' nú (sem tipo) captura absolutamente tudo — até KeyboardInterrupt e SystemExit. Se calcular_kda tiver um bug de digitação (NameError, TypeError), vira silenciosamente 0.0. Use 'except ZeroDivisionError' ou o tipo específico esperado. O erro secundário é que nem logou o problema."
+  }
+];
+
+let seenCards = new Set();
+let currentQuestion = 0;
+let answers = [];
+let score = 0;
+
+function renderCards() {
+  const container = document.getElementById('cards-container');
+  container.innerHTML = '';
+  errors.forEach(err => {
+    const card = document.createElement('div');
+    card.className = 'error-card' + (seenCards.has(err.id) ? ' selected' : '');
+    card.innerHTML = `
+      <div class="card-icon"><i class="ti ${err.icon}" aria-hidden="true"></i></div>
+      <div class="card-title">${err.title}</div>
+      <div class="card-desc">${err.desc}</div>
+    `;
+    card.onclick = () => openDetail(err.id);
+    container.appendChild(card);
+  });
+  updateSeenCounter();
+}
+
+function openDetail(id) {
+  seenCards.add(id);
+  const err = errors[id];
+  document.getElementById('detail-title').textContent = `Erro ${id+1}: ${err.title}`;
+  document.getElementById('detail-problem').textContent = err.problem;
+  document.getElementById('detail-bad').textContent = err.bad;
+  document.getElementById('detail-good').textContent = err.good;
+  document.getElementById('detail-fix').textContent = '✓ ' + err.fix;
+  document.getElementById('card-detail').style.display = 'block';
+  renderCards();
+  document.getElementById('btn-start-quiz').disabled = seenCards.size < 5;
+}
+
+function closeDetail() {
+  document.getElementById('card-detail').style.display = 'none';
+}
+
+function updateSeenCounter() {
+  const seen = seenCards.size;
+  const total = errors.length;
+  const el = document.getElementById('cards-seen-counter');
+  if (seen === 0) {
+    el.textContent = 'Clique nos cards para explorar cada erro.';
+  } else if (seen < 5) {
+    el.textContent = `${seen} de ${total} explorados — veja pelo menos 5 para liberar o quiz.`;
+  } else if (seen < total) {
+    el.textContent = `${seen} de ${total} explorados — quiz liberado! Pode continuar explorando ou iniciar.`;
+    document.getElementById('btn-start-quiz').disabled = false;
+  } else {
+    el.textContent = 'Todos os ${total} erros explorados. Você está pronto!';
+    document.getElementById('btn-start-quiz').disabled = false;
+  }
+}
+
+function revealAll() {
+  errors.forEach(e => seenCards.add(e.id));
+  renderCards();
+  document.getElementById('btn-start-quiz').disabled = false;
+  document.getElementById('card-detail').style.display = 'none';
+}
+
+function startQuiz() {
+  currentQuestion = 0;
+  answers = [];
+  score = 0;
+  showScreen('screen-quiz');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = quizQuestions[currentQuestion];
+  const total = quizQuestions.length;
+
+  document.getElementById('q-counter').textContent = `Questão ${currentQuestion+1} de ${total}`;
+  document.getElementById('q-text').textContent = q.text;
+  document.getElementById('q-code').textContent = q.code;
+  document.getElementById('quiz-progress').style.width = ((currentQuestion / total) * 100) + '%';
+  document.getElementById('btn-next').disabled = true;
+
+  const fb = document.getElementById('feedback-box');
+  fb.className = 'feedback-box';
+  fb.style.display = 'none';
+
+  const dots = document.getElementById('nav-dots');
+  dots.innerHTML = '';
+  for (let i = 0; i < total; i++) {
+    const d = document.createElement('div');
+    if (i < answers.length) {
+      d.className = 'nav-dot ' + (answers[i] ? 'done' : 'wrong-dot');
+    } else if (i === currentQuestion) {
+      d.className = 'nav-dot current';
+    } else {
+      d.className = 'nav-dot';
+    }
+    dots.appendChild(d);
+  }
+
+  const opts = document.getElementById('options-container');
+  opts.innerHTML = '';
+  const shuffled = [...q.options].sort(() => Math.random() - 0.5);
+  shuffled.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = opt.text;
+    btn.onclick = () => selectAnswer(opt.id, q.correctAnswer, q.explanation, btn);
+    opts.appendChild(btn);
+  });
+}
+
+function selectAnswer(selectedId, correctId, explanation, clickedBtn) {
+  const allBtns = document.querySelectorAll('.option-btn');
+  allBtns.forEach(b => { b.disabled = true; });
+
+  const isCorrect = selectedId === correctId;
+  clickedBtn.className = 'option-btn ' + (isCorrect ? 'correct' : 'wrong');
+
+  if (!isCorrect) {
+    allBtns.forEach(b => {
+      const errId = quizQuestions[currentQuestion].options.find(o => o.text === b.textContent)?.id;
+      if (errId === correctId) b.className = 'option-btn correct';
+    });
+  }
+
+  const fb = document.getElementById('feedback-box');
+  fb.className = 'feedback-box visible ' + (isCorrect ? 'success' : 'danger');
+  fb.textContent = (isCorrect ? '✓ Correto! ' : '✗ Não exatamente. ') + explanation;
+  fb.style.display = 'block';
+
+  answers.push(isCorrect);
+  if (isCorrect) score++;
+  document.getElementById('btn-next').disabled = false;
+
+  const dots = document.getElementById('nav-dots');
+  const dotEls = dots.querySelectorAll('.nav-dot');
+  if (dotEls[currentQuestion]) {
+    dotEls[currentQuestion].className = 'nav-dot ' + (isCorrect ? 'done' : 'wrong-dot');
+  }
+}
+
+function nextQuestion() {
+  currentQuestion++;
+  if (currentQuestion >= quizQuestions.length) {
+    showResults();
+  } else {
+    renderQuestion();
+  }
+}
+
+function showResults() {
+  showScreen('screen-result');
+  const total = quizQuestions.length;
+  const wrong = total - score;
+  const pct = Math.round((score / total) * 100);
+
+  document.getElementById('res-correct').textContent = score;
+  document.getElementById('res-wrong').textContent = wrong;
+  document.getElementById('res-pct').textContent = pct + '%';
+
+  let title, sub;
+  if (pct >= 80) { title = 'Excelente!'; sub = 'Você domina o tratamento de exceptions. Pronto para o projeto.'; }
+  else if (pct >= 60) { title = 'Bom trabalho.'; sub = 'Alguns pontos merecem revisão antes de aplicar no projeto.'; }
+  else { title = 'Precisa revisar.'; sub = 'Reveja os cards antes de aplicar exceptions no projeto.'; }
+
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-sub').textContent = sub;
+
+  const list = document.getElementById('review-list');
+  list.innerHTML = '';
+  quizQuestions.forEach((q, i) => {
+    const ok = answers[i];
+    const div = document.createElement('div');
+    div.className = 'review-item';
+    const short = q.text.length > 80 ? q.text.slice(0, 80) + '...' : q.text;
+    const correctOpt = q.options.find(o => o.id === q.correctAnswer);
+    div.innerHTML = `
+      <div class="ri-top">
+        <i class="ti ${ok ? 'ti-circle-check ri-icon ok' : 'ti-circle-x ri-icon fail'}" aria-hidden="true"></i>
+        <div class="ri-q">${short}</div>
+      </div>
+      <div class="ri-answer">${ok ? 'Correto.' : 'Correto seria: ' + correctOpt.text}</div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function resetAll() {
+  seenCards = new Set();
+  currentQuestion = 0;
+  answers = [];
+  score = 0;
+  renderCards();
+  showScreen('screen-intro');
+  document.getElementById('card-detail').style.display = 'none';
+  document.getElementById('btn-start-quiz').disabled = true;
+}
+
+renderCards();
+</script>
