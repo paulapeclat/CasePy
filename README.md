@@ -6,11 +6,11 @@ Estudo de caso em Python usado nas aulas de desenvolvimento de software da **Edu
 
 | Pasta / arquivo | Para que serve |
 |---|---|
-| `projeto_inicial/` | Ponto de partida do caso: `completo.py`, versão comentada, notebook e guia visual do pipeline |
+| `projeto_inicial/` | Ponto de partida do caso: `completo.py`, versão comentada, notebook, guia visual do pipeline e o briefing do cliente |
 | `simulador/` | Servidor Flask local que roda o pipeline a cada envio e salva em `simulador/dados/` |
-| `explicasues/` | Notebooks de gabarito comentados |
-| `completo_gabarito.py` | Gabarito de estudo, linha por linha, do bloco novo de `completo.py` |
 | `simulador_educacional.pdf` | Material de apoio |
+
+O cliente do briefing, a Arena Carioca, é fictício e foi criado para este estudo de caso.
 
 ## Como rodar o simulador
 
@@ -28,4 +28,11 @@ Depois, abra http://127.0.0.1:5000 no navegador.
 
 ## Licença
 
-Código sob licença [MIT](LICENSE). © Paula Peclat.
+© 2026 Paula Peclat.
+
+- **Código** (`.py`, `.ipynb`, `simulador/`): licença [MIT](LICENSE).
+- **Textos e materiais de apoio** (PDFs, `pipeline_guia.html` e este README): licença [CC BY 4.0](LICENSE-CONTEUDO.md).
+
+## Como citar
+
+Use o botão **Cite this repository**, no alto da página do repositório, ou os dados do arquivo [`CITATION.cff`](CITATION.cff).
