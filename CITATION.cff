@@ -6,6 +6,7 @@ authors:
     given-names: Paula
     affiliation: "Educação Tecnológica Paula Peclat"
     orcid: "https://orcid.org/0009-0008-6535-7090"
+doi: 10.5281/zenodo.24238326
 version: 1.0.0
 date-released: 2026-11-14
 repository-code: "https://github.com/paulapeclat/casepy"

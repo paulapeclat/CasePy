@@ -1,5 +1,7 @@
 # CasePy · Game Analytics Engine
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24238326.svg)](https://doi.org/10.5281/zenodo.24238326)
+
 Estudo de caso em Python usado nas aulas de desenvolvimento de software da **Educação Tecnológica Paula Peclat**. A turma constrói um pipeline que recebe estatísticas de jogadores, limpa e valida os dados com **Pydantic**, calcula um **índice de combate** e grava o resultado em JSON. Um simulador web em **Flask** permite testar o pipeline pelo navegador.
 
 ## O que tem aqui
