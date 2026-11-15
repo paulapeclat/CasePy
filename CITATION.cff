@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "Se este material foi útil no seu trabalho ou pesquisa, cite-o assim:"
+title: "CasePy: estudo de caso em Python sobre pipeline de dados de jogadores"
+authors:
+  - family-names: Peclat
+    given-names: Paula
+    affiliation: "Educação Tecnológica Paula Peclat"
+    orcid: "https://orcid.org/0009-0008-6535-7090"
+version: 1.0.0
+date-released: 2026-11-14
+repository-code: "https://github.com/paulapeclat/casepy"
+url: "https://paulapeclat.com.br"
+license:
+  - MIT
+  - CC-BY-4.0
+keywords:
+  - "Python"
+  - "Pydantic"
+  - "Flask"
+  - "estudo de caso"
+  - "ensino de programação"
+  - "dados de jogos"
+abstract: >-
+  Estudo de caso usado nas aulas de desenvolvimento de software da Educação Tecnológica Paula Peclat. A turma constrói um pipeline que limpa e valida estatísticas de jogadores com Pydantic, calcula um índice de combate e grava o resultado em JSON, testando tudo por um simulador web em Flask. Código sob licença MIT e textos e PDFs sob CC BY 4.0.

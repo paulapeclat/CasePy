@@ -3,3 +3,6 @@ __pycache__/
 .venv/
 .ipynb_checkpoints/
 .env
+
+# Arquivos gerados pelo simulador a cada envio
+simulador/dados/*.json
